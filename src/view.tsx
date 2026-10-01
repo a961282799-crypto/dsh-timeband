@@ -86,9 +86,9 @@ export function TimeBand({ wide, useClock, t }: TimeBandProps) {
       onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); hide(); } }}>
       <header className="dtb-header"><div><div className="dtb-eyebrow">DEEPSEEK / TIMEBAND</div><h2 id={`${id}-title`}>{t('title')}</h2></div>
         <button type="button" className="dtb-close" ref={close} aria-label={t('close')} onClick={hide}>×</button></header>
-      <div className="dtb-status"><span className={`dtb-dot dtb-${band}`} /><strong>{t(band)}</strong><time>{time}</time></div>
+      <div className="dtb-status"><span className={`dtb-dot dtb-${band}`} /><strong>{t(band)}</strong></div>
       <div className="dtb-next"><span>{t(nextLabel)}</span><strong aria-label={`${t(nextLabel)} ${countdownText}`}>{countdownView}</strong></div>
-      <div className="dtb-date"><span>{t('zone')}</span><span>{nextDate}</span></div>
+      <div className="dtb-date"><span>{t('zone')}</span><span>{nextDate && <>{t('nextSwitch')} {nextDate}</>}</span></div>
       <div className="dtb-axis" role="img" aria-label={`${t('timeline')}：${segments.map(s => `${s.start}:00–${s.end}:00 ${t(s.band)}`).join('；')}。${t('now')} ${time}`}>
         <div className="dtb-now" style={{ left: `${Math.min(91, Math.max(9, day.hour / 24 * 100))}%` }}>{t('now')} {time}</div>
         <Track segments={segments} hour={day.hour} />

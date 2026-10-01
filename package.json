@@ -1,20 +1,58 @@
 {
   "name": "dsh-timeband",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "头像旁的 DeepSeek 峰谷时段与今日时间轴",
   "type": "module",
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/a961282799-crypto/dsh-timeband.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a961282799-crypto/dsh-timeband.git"
+  },
   "homepage": "https://github.com/a961282799-crypto/dsh-timeband#readme",
-  "bugs": { "url": "https://github.com/a961282799-crypto/dsh-timeband/issues" },
+  "bugs": {
+    "url": "https://github.com/a961282799-crypto/dsh-timeband/issues"
+  },
   "main": "./dist/index.js",
-  "exports": { ".": "./dist/index.js", "./client": "./dist/client.js", "./package.json": "./package.json" },
-  "files": ["dist", "cordis.patch.yml", "README.md", "LICENSE"],
-  "keywords": ["dsh-plugin", "deepseek-harness", "timeline"],
-  "engines": { "node": ">=22" },
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" }, "client": { "platform": "web", "inject": ["@deepseek-ai/dsh-client-ui-renderer", "@deepseek-ai/dsh-client-ui-sidebar", "@deepseek-ai/dsh-client-locale"] } },
-  "peerDependencies": { "@deepseek-ai/dsh": "0.2.0-rc.2" },
-  "peerDependenciesMeta": { "@deepseek-ai/dsh": { "optional": true } },
+  "exports": {
+    ".": "./dist/index.js",
+    "./client": "./dist/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "timeline"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": "0.2.0-rc.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh": {
+      "optional": true
+    }
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",

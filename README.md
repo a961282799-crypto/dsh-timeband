@@ -35,18 +35,18 @@ DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒
 
 已针对 **DeepSeek Harness 0.2.0-rc.2** 制作。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
 
-从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.0.0) 下载预构建安装包 `dsh-timeband-1.0.0.tgz`。不需要安装开发依赖或自行编译。
+从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.0.1) 下载预构建安装包 `dsh-timeband-1.0.1.tgz`。不需要安装开发依赖或自行编译。
 
 从托盘完全退出 Harness，在下载目录执行：
 
 ```powershell
-dsh plugin --profile desktop add ./dsh-timeband-1.0.0.tgz
+dsh plugin --profile desktop add ./dsh-timeband-1.0.1.tgz
 ```
 
 如果 `dsh` 不在 PATH，使用桌面端安装目录中随附的命令，例如：
 
 ```powershell
-& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.0.0.tgz
+& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.0.1.tgz
 ```
 
 安装后重新打开 Harness，侧栏底部即可看到插件。卸载：
