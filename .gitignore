@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.preview/
+test-results/
+playwright-report/
+*.tgz
+.install-check/
+artifacts/

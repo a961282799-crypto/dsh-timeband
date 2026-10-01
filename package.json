@@ -1,0 +1,43 @@
+{
+  "name": "dsh-timeband",
+  "version": "1.0.0",
+  "description": "头像旁的 DeepSeek 峰谷时段与今日时间轴",
+  "type": "module",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/a961282799-crypto/dsh-timeband.git" },
+  "homepage": "https://github.com/a961282799-crypto/dsh-timeband#readme",
+  "bugs": { "url": "https://github.com/a961282799-crypto/dsh-timeband/issues" },
+  "main": "./dist/index.js",
+  "exports": { ".": "./dist/index.js", "./client": "./dist/client.js", "./package.json": "./package.json" },
+  "files": ["dist", "cordis.patch.yml", "README.md", "LICENSE"],
+  "keywords": ["dsh-plugin", "deepseek-harness", "timeline"],
+  "engines": { "node": ">=22" },
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" }, "client": { "platform": "web", "inject": ["@deepseek-ai/dsh-client-ui-renderer", "@deepseek-ai/dsh-client-ui-sidebar", "@deepseek-ai/dsh-client-locale"] } },
+  "peerDependencies": { "@deepseek-ai/dsh": "0.2.0-rc.2" },
+  "peerDependenciesMeta": { "@deepseek-ai/dsh": { "optional": true } },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts tests/*.test.mjs",
+    "test:browser": "playwright test",
+    "preview": "node scripts/preview.mjs",
+    "screenshots": "node scripts/screenshots.mjs",
+    "check": "npm run typecheck && npm run build && npm test && npm run test:browser",
+    "prepack": "npm run typecheck && npm run build"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.4",
+    "@deepseek-ai/dsh-client-locale": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-sidebar": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-slots": "0.2.0-rc.2",
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.0",
+    "esbuild": "0.28.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "typescript": "7.0.2"
+  }
+}
