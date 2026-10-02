@@ -4,7 +4,7 @@ export const zh = {
   weekday: '周一至周五', weekend: '周末 · 全天谷时段', holiday: '公共假期 · 全天谷时段',
   unverified: '本年度节假日日历待更新', allDay: '全天', rest: '其余时段', now: '现在',
   nextSwitch: '下次切换：', close: '关闭时间轴', open: '查看峰谷时间轴', rule: 'DeepSeek 官方时段规则',
-  calendar: '节假日日历：2026', note: '周末（含调休上班日）及公共假期全天为谷时段。',
+  details: '时段规则与日历', calendar: '节假日日历：2026', note: '周末（含调休上班日）及公共假期全天为谷时段。',
   unknownNote: '缺少本年度假期数据，工作日峰时段暂不作确定判断。',
   timeline: '北京时间 24 小时时间轴', days: '天', hours: '小时', minutes: '分钟', seconds: '秒',
 };
@@ -15,7 +15,7 @@ export const en: Record<TextKey, string> = {
   weekday: 'Monday–Friday', weekend: 'Weekend · off-peak all day', holiday: 'Public holiday · off-peak all day',
   unverified: 'Holiday calendar needs an update', allDay: 'All day', rest: 'All other hours', now: 'Now',
   nextSwitch: 'Next change:', close: 'Close timeline', open: 'View peak hours timeline', rule: 'DeepSeek official schedule',
-  calendar: 'Holiday calendar: 2026', note: 'Weekends (including makeup workdays) and public holidays are off-peak all day.',
+  details: 'Schedule rules and calendar', calendar: 'Holiday calendar: 2026', note: 'Weekends (including makeup workdays) and public holidays are off-peak all day.',
   unknownNote: 'Holiday data for this year is unavailable; weekday peak periods are unverified.',
   timeline: '24-hour timeline in Beijing time', days: 'd', hours: 'h', minutes: 'min', seconds: 's',
 };

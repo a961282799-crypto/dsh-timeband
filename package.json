@@ -1,6 +1,6 @@
 {
   "name": "dsh-timeband",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "头像旁的 DeepSeek 峰谷时段与今日时间轴",
   "type": "module",
   "license": "MIT",

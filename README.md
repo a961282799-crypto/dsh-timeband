@@ -2,7 +2,7 @@
 
 DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒计时、迷你时间轴常驻；点击查看北京时间 24 小时时间轴。没有价格、消费金额、Token、余额或预计节省功能，也不读取账户或 API Key。
 
-支持浅色 / 深色、中英文、侧栏折叠与节假日全天谷时段。离线运行，采用宿主共享的 React 和 Cordis 原生插件接口。
+支持浅色 / 深色、中英文、侧栏折叠与节假日全天谷时段。节假日卡片精简重复时段说明，规则与日历默认折叠；关键时间与刻度使用更清晰的字号和颜色。离线运行，采用宿主共享的 React 和 Cordis 原生插件接口。
 
 ## 展示
 
@@ -35,18 +35,18 @@ DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒
 
 已针对 **DeepSeek Harness 0.2.0-rc.2** 制作。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
 
-从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.0.1) 下载预构建安装包 `dsh-timeband-1.0.1.tgz`。不需要安装开发依赖或自行编译。
+从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.0.2) 下载预构建安装包 `dsh-timeband-1.0.2.tgz`。不需要安装开发依赖或自行编译。
 
 从托盘完全退出 Harness，在下载目录执行：
 
 ```powershell
-dsh plugin --profile desktop add ./dsh-timeband-1.0.1.tgz
+dsh plugin --profile desktop add ./dsh-timeband-1.0.2.tgz
 ```
 
 如果 `dsh` 不在 PATH，使用桌面端安装目录中随附的命令，例如：
 
 ```powershell
-& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.0.1.tgz
+& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.0.2.tgz
 ```
 
 安装后重新打开 Harness，侧栏底部即可看到插件。卸载：

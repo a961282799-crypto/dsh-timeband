@@ -95,14 +95,16 @@ export function TimeBand({ wide, useClock, t }: TimeBandProps) {
         <div className="dtb-ticks"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
       </div>
       <div className="dtb-day-kind">{day.key} <span>·</span> {t(day.kind)}</div>
-      <div className="dtb-periods">
-        {segments.length === 1 ? <div><span><i className="dtb-dot dtb-offpeak" />{t('offpeak')}</span><b>00:00 — 24:00</b></div> : <>
+      {segments.length > 1 && <div className="dtb-periods">
           <div><span><i className={`dtb-dot dtb-${day.covered ? 'peak' : 'unknown'}`} />{t(day.covered ? 'peak' : 'unknown')}</span><b>09:00–12:00 · 14:00–18:00</b></div>
           <div><span><i className="dtb-dot dtb-offpeak" />{t('offpeak')}</span><b>{t('rest')}</b></div>
-        </>}
-      </div>
-      <p className="dtb-note">{t(day.covered ? 'note' : 'unknownNote')}</p>
-      <footer className="dtb-footer"><span>{t('calendar')}</span><a href={PRICING_SOURCE} target="_blank" rel="noreferrer">{t('rule')} ↗</a></footer>
+      </div>}
+      {!day.covered && <p className="dtb-note">{t('unknownNote')}</p>}
+      <details className="dtb-details">
+        <summary>{t('details')}</summary>
+        <p className="dtb-note">{t('note')}</p>
+        <footer className="dtb-footer"><span>{t('calendar')}</span><a href={PRICING_SOURCE} target="_blank" rel="noreferrer">{t('rule')} ↗</a></footer>
+      </details>
     </div>, document.body)}
   </div>;
 }
