@@ -6,7 +6,7 @@ const future = { ...builtin, years: [2027], holidays: [['2027-01-04', '2027-01-0
 const file = (data: unknown) => ({ name: 'calendar.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(data)) });
 async function openCalendar(page: import('@playwright/test').Page) {
   await page.locator('.dtb-chip').click();
-  if (await page.locator('.dtb-details').getAttribute('open') === null) await page.getByText('时段规则与日历', { exact: true }).click();
+  if (await page.locator('.dtb-details').getAttribute('open') === null) await page.getByText('规则、日历与提醒', { exact: true }).click();
 }
 
 test('import updates both tracks, persists after reload, syncs across windows and restores', async ({ page, context }) => {
@@ -66,7 +66,7 @@ test('expiry and corrupt-storage notices are readable in both languages and smal
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: '中文 / English' }).click();
   await page.locator('.dtb-chip').click();
-  if (await page.locator('.dtb-details').getAttribute('open') === null) await page.getByText('Schedule rules and calendar', { exact: true }).click();
+  if (await page.locator('.dtb-details').getAttribute('open') === null) await page.getByText('Rules, calendar and reminders', { exact: true }).click();
   await expect(page.getByRole('button', { name: 'Import calendar', exact: true })).toBeVisible();
   await expect(page.locator('.dtb-calendar-notice')).toContainText('Calendar expires soon');
   await page.setViewportSize({ width: 320, height: 480 });

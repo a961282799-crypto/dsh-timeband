@@ -14,15 +14,25 @@ let plugin: { apply: (ctx: unknown) => void };
 let dictionaries: { zh: Record<TextKey, string>; en: Record<TextKey, string> };
 let clock: { subscribe: (listener: () => void) => () => void; getSnapshot: () => number };
 let calendarStore: TimeBandProps['calendarStore'];
+let reminderStore: TimeBandProps['reminderStore'];
+let testReminder: TimeBandProps['testReminder'];
 const registry: Record<string, unknown> = { react: React, 'react-dom': ReactDOM, 'react/jsx-runtime': jsxRuntime };
 const params = new URLSearchParams(location.search);
+let activeLocale: 'zh' | 'en' = params.has('en') ? 'en' : 'zh';
 let instant = params.get('now') ? Date.parse(params.get('now')!) : Date.now();
 const host = {
   effect(fn: () => (() => void) | void) { const dispose = fn(); if (dispose) pluginCleanup.push(dispose); },
-  locale: { register: (_namespace: string, values: typeof dictionaries) => { dictionaries = values; return () => undefined; } },
+  locale: {
+    register: (_namespace: string, values: typeof dictionaries) => { dictionaries = values; return () => undefined; },
+    bind: (_namespace: string) => (key: TextKey, values?: Record<string, string | number>) => {
+      let text = dictionaries[activeLocale][key];
+      for (const [key, value] of Object.entries(values ?? {})) text = text.replaceAll(`{${key}}`, String(value));
+      return text;
+    },
+  },
   slots: {
     inject: (_: string, fn: () => void) => fn(),
-    register: (options: { inject: () => { hooks: { clock: typeof clock }; props: { calendarStore: typeof calendarStore } } }, component: typeof Component) => { Component = component; const injected = options.inject(); clock = injected.hooks.clock; calendarStore = injected.props.calendarStore; },
+    register: (options: { inject: () => { hooks: { clock: typeof clock }; props: { calendarStore: typeof calendarStore; reminderStore: typeof reminderStore; testReminder: typeof testReminder } } }, component: typeof Component) => { Component = component; const injected = options.inject(); clock = injected.hooks.clock; calendarStore = injected.props.calendarStore; reminderStore = injected.props.reminderStore; testReminder = injected.props.testReminder; },
   },
 };
 (window as unknown as { __ModuleLoader__: unknown }).__ModuleLoader__ = {
@@ -40,7 +50,7 @@ function Preview() {
   const [now, setNow] = useState(instant);
   const clockNow = useSyncExternalStore(clock.subscribe, clock.getSnapshot);
   const dict = english ? dictionaries.en : dictionaries.zh;
-  const props = { wide, calendarStore, t: (key: TextKey) => dict[key], useClock: (select: (n: number) => number) => select(params.has('live') ? clockNow : now) } as TimeBandProps;
+  const props = { wide, calendarStore, reminderStore, testReminder, t: (key: TextKey) => dict[key], useClock: (select: (n: number) => number) => select(params.has('live') ? clockNow : now) } as TimeBandProps;
   return <div className="preview-shell"><aside className={`preview-sidebar${wide ? '' : ' narrow'}`}>
     <div className="preview-brand">{wide ? 'DeepSeek Harness' : 'DS'}</div>
     {wide && <div className="preview-nav">＋ 新建对话<br />工作区<br />最近的对话</div>}
@@ -51,7 +61,7 @@ function Preview() {
       <div className="preview-controls"><select aria-label="预览场景" onChange={e => { instant = Date.parse(e.target.value); setNow(instant); }} defaultValue="">
         <option value="" disabled>选择测试场景</option><option value="2026-09-30T10:30:00+08:00">工作日 · 峰时段</option><option value="2026-09-30T12:30:00+08:00">午间 · 谷时段</option>
         <option value="2026-10-01T10:30:00+08:00">国庆假期</option><option value="2026-10-10T10:30:00+08:00">调休周六</option><option value="2027-01-04T10:30:00+08:00">未知年份</option></select>
-        <button onClick={() => setWide(!wide)}>收起 / 展开侧栏</button><button onClick={() => setEnglish(!english)}>中文 / English</button>
+        <button onClick={() => setWide(!wide)}>收起 / 展开侧栏</button><button onClick={() => { activeLocale = english ? 'zh' : 'en'; setEnglish(!english); }}>中文 / English</button>
         <button onClick={() => { if (mounted) { pluginCleanup.forEach(fn => fn()); pluginCleanup = []; } else plugin.apply(host); setMounted(!mounted); }}>卸载 / 挂载插件</button>
       </div><p className="preview-note">这是可交互的宿主布局模拟，使用真实插件构建产物。<br />预览时间固定，便于核对边界；安装后自动按当前时间更新。</p></main></div>;
 }

@@ -5,18 +5,24 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client';
 import { countdown, createScheduleReader, HOUR, PRICING_SOURCE } from './schedule.ts';
 import { CalendarError, CALENDAR_DOWNLOAD, MAX_CALENDAR_BYTES } from './calendar.ts';
 import type { CalendarStore } from './calendar-store.ts';
+import type { ReminderIssue, ReminderStore } from './reminder-store.ts';
 import type { Segment } from './schedule.ts';
 import type { TextKey } from './locales.ts';
 
 export type TimeBandProps = PropsRuntime<'sidebar.footer.action'> & PropsLocale<'timeband'> & {
   useClock: (select: (now: number) => number) => number;
   calendarStore: CalendarStore;
+  reminderStore: ReminderStore;
+  testReminder: () => void;
 };
 
 const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
   timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
 });
 const timeFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const reminderIssues: Record<ReminderIssue, TextKey> = {
+  denied: 'reminderDenied', unsupported: 'reminderUnsupported', storage: 'reminderStorageError', delivery: 'reminderDeliveryError',
+};
 
 function Track({ segments, hour, small = false }: { segments: Segment[]; hour: number; small?: boolean }) {
   return <div className={`dtb-track${small ? ' dtb-track-small' : ''}`} aria-hidden="true">
@@ -26,9 +32,10 @@ function Track({ segments, hour, small = false }: { segments: Segment[]; hour: n
   </div>;
 }
 
-export function TimeBand({ wide, useClock, t, calendarStore }: TimeBandProps) {
+export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, testReminder }: TimeBandProps) {
   const now = useClock(value => value);
   const calendarState = useSyncExternalStore(calendarStore.subscribe, calendarStore.getSnapshot);
+  const reminderState = useSyncExternalStore(reminderStore.subscribe, reminderStore.getSnapshot);
   const readSchedule = useMemo(() => createScheduleReader(), []);
   const { day, band, next, segments, coverage } = readSchedule(now, calendarState.data);
   const hour = (now - day.midnight) / HOUR;
@@ -122,6 +129,15 @@ export function TimeBand({ wide, useClock, t, calendarStore }: TimeBandProps) {
       <details className="dtb-details">
         <summary>{t('details')}</summary>
         <p className="dtb-note">{t('note')}</p>
+        <div className="dtb-reminder-settings">
+          <label className="dtb-reminder-toggle"><span>{t('reminder')}</span>
+            <input type="checkbox" role="switch" checked={reminderState.enabled} disabled={reminderState.busy}
+              onChange={event => { void reminderStore.setEnabled(event.currentTarget.checked); }} />
+          </label>
+          {reminderState.enabled && <button type="button" className="dtb-button" onClick={testReminder}>{t('reminderTest')}</button>}
+          <p className="dtb-note">{t('reminderHint')}</p>
+          {reminderState.issue && <p className="dtb-note dtb-reminder-feedback" role="status">{t(reminderIssues[reminderState.issue])}</p>}
+        </div>
         <div className="dtb-calendar-meta">
           <span>{t('calendar')} {calendarState.data.years.join('、')} · {t(calendarState.imported ? 'calendarLocal' : 'calendarBuiltin')}</span>
           <span>{t('calendarVerified')} {calendarState.data.verifiedOn}</span>

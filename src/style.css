@@ -75,6 +75,15 @@ div:has(> div > .dtb-root[data-wide='true']:only-child):has(> div button[data-co
 .dtb-note { font-size: 11px; color: var(--dtb-secondary); line-height: 1.7; margin: 13px 0; }
 .dtb-details { border-top: 1px solid var(--dtb-line); margin-top: 16px; padding-top: 12px; }
 .dtb-details summary { width: fit-content; cursor: pointer; font-size: 11px; color: var(--dtb-secondary); line-height: 1.8; }
+.dtb-reminder-settings { border-bottom: 1px solid var(--dtb-line); margin-bottom: 14px; }
+.dtb-reminder-settings .dtb-button { margin-top: 9px; font-size: 11px; }
+.dtb-reminder-toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 11px; cursor: pointer; }
+.dtb-reminder-toggle input { appearance: none; flex: none; position: relative; width: 30px; height: 17px; margin: 0; border: 1px solid var(--dtb-line); border-radius: 12px; background: var(--dtb-muted); cursor: pointer; }
+.dtb-reminder-toggle input::after { content: ''; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--dtb-bg); }
+.dtb-reminder-toggle input:checked { background: var(--dtb-green); }
+.dtb-reminder-toggle input:checked::after { left: 15px; }
+.dtb-reminder-toggle input:focus-visible { outline: 2px solid var(--dtb-green); outline-offset: 3px; }
+.dtb-reminder-toggle input:disabled { opacity: .5; cursor: default; }
 .dtb-calendar-meta { display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: var(--dtb-secondary); }
 .dtb-calendar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 11px; }
 .dtb-button { padding: 5px 9px; border: 1px solid var(--dtb-line); border-radius: 6px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
