@@ -50,7 +50,7 @@ DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒
 
 已针对 **DeepSeek Harness 0.2.0-rc.2** 制作。2026-10-04 核对 npm `latest` 仍为此版本，四个宿主测试依赖与随附桌面 CLI 版本一致。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
 
-可通过 [npm](https://www.npmjs.com/package/dsh-timeband) 安装，在桌面端「插件 → 添加插件」输入 `dsh-timeband`；或在退出桌面端后执行 `dsh plugin --profile desktop add dsh-timeband@1.3.2`。也可直接安装下方的 GitHub 预构建包。
+新版 **v1.3.2** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
 
 从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.2) 下载预构建安装包 `dsh-timeband-1.3.2.tgz`。不需要安装开发依赖或自行编译。
 

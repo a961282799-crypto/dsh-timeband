@@ -4,7 +4,8 @@ test('built plugin renders through real rc.2 entry injection, clock hooks and un
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-  await page.clock.install({ time: new Date('2026-09-30T11:59:59+08:00') });
+  await page.clock.install({ time: new Date('2026-09-30T11:58:59+08:00') });
+  await page.clock.pauseAt(new Date('2026-09-30T11:59:59+08:00'));
   await page.goto('/host');
   await expect.poll(() => page.evaluate(() => Boolean(window.timebandHost))).toBe(true);
   expect(errors).toEqual([]);

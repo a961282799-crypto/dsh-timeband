@@ -15,7 +15,9 @@ async function openSettings(page: Page) {
 test('real rc.2 host updates at the 30-day boundary and refreshes the next-year holiday timeline', async ({ page }) => {
   let requests = 0;
   await page.route(updateUrl, route => { requests++; return route.fulfill({ json: future }); });
-  await page.clock.install({ time: new Date('2026-12-01T23:59:59+08:00') });
+  // Hold the boundary until runFor advances it; page loading must not consume it.
+  await page.clock.install({ time: new Date('2026-12-01T23:58:59+08:00') });
+  await page.clock.pauseAt(new Date('2026-12-01T23:59:59+08:00'));
   await page.goto('/host'); await openSettings(page);
   expect(requests).toBe(0);
   await expect(page.locator('.dtb-calendar-meta, .dtb-calendar-actions, input[type="file"]')).toHaveCount(0);

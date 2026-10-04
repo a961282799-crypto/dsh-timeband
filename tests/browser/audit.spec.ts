@@ -31,7 +31,8 @@ test('long holiday countdown fits narrow sidebar and small window in both langua
 });
 
 test('real plugin clock changes period and countdown while the popover stays open', async ({ page }) => {
-  await page.clock.install({ time: new Date('2026-09-30T11:59:59+08:00') });
+  await page.clock.install({ time: new Date('2026-09-30T11:58:59+08:00') });
+  await page.clock.pauseAt(new Date('2026-09-30T11:59:59+08:00'));
   await page.goto('/?live');
   await page.locator('.dtb-chip').click();
   await expect(page.locator('.dtb-next strong')).toHaveText('1秒');
@@ -44,7 +45,8 @@ test('real plugin clock changes period and countdown while the popover stays ope
 });
 
 test('midnight into a public holiday refreshes both tracks without a reload', async ({ page }) => {
-  await page.clock.install({ time: new Date('2026-09-30T23:59:59+08:00') });
+  await page.clock.install({ time: new Date('2026-09-30T23:58:59+08:00') });
+  await page.clock.pauseAt(new Date('2026-09-30T23:59:59+08:00'));
   await page.goto('/?live');
   await page.locator('.dtb-chip').click();
   await expect(page.locator('.dtb-card .dtb-segment.dtb-peak')).toHaveCount(2);
