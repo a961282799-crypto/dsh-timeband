@@ -1,7 +1,7 @@
 import test from 'node:test';
 import type { TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { calendar } from '../src/calendar.ts';
+import { calendar, parseCalendar } from '../src/calendar.ts';
 import { createCalendarStore } from '../src/calendar-store.ts';
 import { createReminderStore, REMINDER_STORAGE_KEY } from '../src/reminder-store.ts';
 import { createReminders, REMINDER_SENT_KEY } from '../src/reminders.ts';
@@ -98,13 +98,13 @@ test('holidays and weekends are skipped; an unknown calendar never predicts a pe
   await f.advance(5 * 60_000); assert.equal(f.notices.length, 1);
 });
 
-test('calendar replacement cancels an armed reminder and restoring recomputes it', async context => {
+test('automatic calendar updates cancel an armed reminder and corrected data recomputes it', async context => {
   const f = fixture(context, '2026-09-30T13:54:59');
   await f.reminderStore.setEnabled(true);
   const holidays = [...calendar.holidays, ['2026-09-30', '2026-09-30']].sort((a, b) => a[0]!.localeCompare(b[0]!));
-  f.calendarStore.import(JSON.stringify({ ...calendar, holidays }));
+  f.calendarStore.save(parseCalendar(JSON.stringify({ ...calendar, holidays })));
   await f.advance(1000); assert.deepEqual(f.notices, []);
-  f.calendarStore.restore(); await settle();
+  f.calendarStore.save(calendar); await settle();
   assert.deepEqual(f.notices, [at('2026-09-30T14:00:00')]);
 });
 

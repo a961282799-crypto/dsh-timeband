@@ -8,7 +8,8 @@ await build({
   entryPoints: ['src/client.ts'], outfile: 'dist/client.js', bundle: true,
   format: 'cjs', platform: 'browser', target: 'chrome120', jsx: 'automatic',
   external: ['react', 'react/jsx-runtime', 'react-dom'], loader: { '.css': 'text' },
-  minify: true, sourcemap: true,
+  // Keep maps for local debugging, without a map request in the shipped client.
+  minify: true, sourcemap: 'external',
   banner: { js: `window.__ModuleLoader__.load({id:${JSON.stringify(pkg.name)},factory:function(require){var module={exports:{}};var exports=module.exports;` },
   footer: { js: 'return module.exports;}});' },
 });

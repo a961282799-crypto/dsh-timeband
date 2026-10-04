@@ -1,0 +1,29 @@
+import { test, expect } from '@playwright/test';
+
+test('built plugin renders through real rc.2 entry injection, clock hooks and unload lifetimes', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.clock.install({ time: new Date('2026-09-30T11:59:59+08:00') });
+  await page.goto('/host');
+  await expect.poll(() => page.evaluate(() => Boolean(window.timebandHost))).toBe(true);
+  expect(errors).toEqual([]);
+  await expect(page.locator('.dtb-chip')).toContainText('峰时段');
+  await expect(page.locator('[data-slot-error]')).toHaveCount(0);
+  await page.locator('.dtb-chip').click();
+  await expect(page.locator('.dtb-next strong')).toHaveText('1秒');
+  await page.clock.runFor(1000);
+  await expect(page.locator('.dtb-status strong')).toHaveText('谷时段');
+  await expect(page.locator('.dtb-next strong')).toHaveText('2小时0分钟0秒');
+  await page.locator('summary').click();
+  await expect(page.getByRole('switch', { name: '峰时段前 5 分钟提醒' })).not.toBeChecked();
+  await expect(page.getByRole('button', { name: '导入日历' })).toHaveCount(0);
+  await expect(page.locator('.dtb-calendar-meta, .dtb-calendar-actions, input[type="file"]')).toHaveCount(0);
+  await page.evaluate(async () => { await (window as unknown as { timebandHost: { unload: () => Promise<void> } }).timebandHost.unload(); });
+  await expect(page.locator('.dtb-root')).toHaveCount(0);
+  await expect(page.locator('style[data-plugin="dsh-timeband"]')).toHaveCount(0);
+  await page.evaluate(async () => { await (window as unknown as { timebandHost: { reload: () => Promise<void> } }).timebandHost.reload(); });
+  await expect(page.locator('.dtb-chip')).toContainText('谷时段');
+  await expect(page.locator('[data-slot-error]')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});

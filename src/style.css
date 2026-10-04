@@ -84,12 +84,14 @@ div:has(> div > .dtb-root[data-wide='true']:only-child):has(> div button[data-co
 .dtb-reminder-toggle input:checked::after { left: 15px; }
 .dtb-reminder-toggle input:focus-visible { outline: 2px solid var(--dtb-green); outline-offset: 3px; }
 .dtb-reminder-toggle input:disabled { opacity: .5; cursor: default; }
-.dtb-calendar-meta { display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: var(--dtb-secondary); }
-.dtb-calendar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 11px; }
 .dtb-button { padding: 5px 9px; border: 1px solid var(--dtb-line); border-radius: 6px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
 .dtb-button:disabled { opacity: .5; cursor: default; }
-.dtb-calendar-actions a { color: var(--dtb-green); text-decoration: none; }
-.dtb-calendar-feedback:empty { display: none; }
+.dtb-reminder-banner { position: fixed; inset: auto 24px 24px auto; margin: 0; width: 320px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 18px; border: 1px solid var(--dtb-line); border-left: 3px solid var(--dtb-green); border-radius: 12px; background: var(--dtb-bg); box-shadow: 0 8px 32px #0002; }
+.dtb-reminder-banner::backdrop { background: transparent; pointer-events: none; }
+.dtb-reminder-banner .dtb-header { align-items: center; gap: 10px; }
+.dtb-reminder-banner .dtb-header strong { font-size: 14px; }
+.dtb-reminder-banner p { line-height: 1.7; margin: 8px 0 0; overflow-wrap: anywhere; }
+.dtb-reminder-banner .dtb-note { margin-bottom: 0; }
 .dtb-calendar-notice { border-left: 2px solid var(--dtb-peak); padding-left: 9px; }
 .dtb-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-top: 3px; font-size: 10px; color: var(--dtb-muted); }
 .dtb-footer a { color: inherit; text-decoration: none; }

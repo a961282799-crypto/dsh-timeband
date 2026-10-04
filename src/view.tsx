@@ -3,9 +3,9 @@ import { createPortal } from 'react-dom';
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client';
 import { countdown, createScheduleReader, HOUR, PRICING_SOURCE } from './schedule.ts';
-import { CalendarError, CALENDAR_DOWNLOAD, MAX_CALENDAR_BYTES } from './calendar.ts';
 import type { CalendarStore } from './calendar-store.ts';
 import type { ReminderIssue, ReminderStore } from './reminder-store.ts';
+import type { DeliveryStatus, ReminderDelivery } from './reminder-delivery.ts';
 import type { Segment } from './schedule.ts';
 import type { TextKey } from './locales.ts';
 
@@ -13,6 +13,7 @@ export type TimeBandProps = PropsRuntime<'sidebar.footer.action'> & PropsLocale<
   useClock: (select: (now: number) => number) => number;
   calendarStore: CalendarStore;
   reminderStore: ReminderStore;
+  reminderDelivery: ReminderDelivery;
   testReminder: () => void;
 };
 
@@ -23,6 +24,23 @@ const timeFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Shangha
 const reminderIssues: Record<ReminderIssue, TextKey> = {
   denied: 'reminderDenied', unsupported: 'reminderUnsupported', storage: 'reminderStorageError', delivery: 'reminderDeliveryError',
 };
+const deliveryMessages: Record<DeliveryStatus, TextKey> = {
+  pending: 'reminderSending', accepted: 'reminderAccepted', unconfirmed: 'reminderUnconfirmed', unavailable: 'reminderFallback',
+};
+
+function ReminderBanner({ delivery, t }: { delivery: ReminderDelivery; t: TimeBandProps['t'] }) {
+  const notice = useSyncExternalStore(delivery.subscribe, delivery.getSnapshot);
+  const banner = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (notice) banner.current?.showPopover(); else banner.current?.hidePopover();
+  }, [notice?.id]);
+  return createPortal(<div ref={banner} popover="manual" className="dtb-reminder-banner dtb-theme" role="status" aria-live="polite">
+    {notice && <><div className="dtb-header"><strong>{notice.title}</strong>
+      <button type="button" className="dtb-close" aria-label={t('dismissReminder')} onClick={delivery.dismiss}>×</button></div>
+      <p>{notice.body}</p><p className="dtb-note dtb-delivery-status">{t(deliveryMessages[notice.delivery])}</p>
+      {notice.sound === 'unavailable' && <p className="dtb-note dtb-sound-feedback">{t('reminderSoundError')}</p>}</>}
+  </div>, document.body);
+}
 
 function Track({ segments, hour, small = false }: { segments: Segment[]; hour: number; small?: boolean }) {
   return <div className={`dtb-track${small ? ' dtb-track-small' : ''}`} aria-hidden="true">
@@ -32,21 +50,19 @@ function Track({ segments, hour, small = false }: { segments: Segment[]; hour: n
   </div>;
 }
 
-export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, testReminder }: TimeBandProps) {
+export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, reminderDelivery, testReminder }: TimeBandProps) {
   const now = useClock(value => value);
   const calendarState = useSyncExternalStore(calendarStore.subscribe, calendarStore.getSnapshot);
   const reminderState = useSyncExternalStore(reminderStore.subscribe, reminderStore.getSnapshot);
+  const reminderNotice = useSyncExternalStore(reminderDelivery.subscribe, reminderDelivery.getSnapshot);
   const readSchedule = useMemo(() => createScheduleReader(), []);
-  const { day, band, next, segments, coverage } = readSchedule(now, calendarState.data);
+  const { day, band, next, segments } = readSchedule(now, calendarState.data);
   const hour = (now - day.midnight) / HOUR;
   const knownNext = next !== null && next.band !== 'unknown' && band !== 'unknown';
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
-  const calendarInput = useRef<HTMLInputElement>(null);
-  const [feedback, setFeedback] = useState<TextKey | null>(null);
-  const [importing, setImporting] = useState(false);
   const id = useId();
   const remaining = knownNext ? countdown(next.at - now) : null;
   const mainText = remaining?.major.map(part => `${part.value}${t(part.unit)}`).join('') ?? '';
@@ -57,15 +73,10 @@ export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, test
   const nextLabel: TextKey = !knownNext ? 'nextUnknown' : next.band === 'peak' ? 'nextPeak' : 'nextOffpeak';
   const nextDate = useMemo(() => knownNext && next ? dateFormatter.format(next.at) : '', [knownNext, next]);
   const time = timeFormatter.format(now);
-  const showError = (error: unknown) => setFeedback(error instanceof CalendarError && error.kind === 'storage' ? 'calendarStorageError' : 'calendarInvalid');
-  const importCalendar = async (file: File) => {
-    setImporting(true); setFeedback(null);
-    try {
-      if (file.size > MAX_CALENDAR_BYTES) throw new CalendarError('invalid');
-      calendarStore.import(await file.text()); setFeedback('calendarImported');
-    } catch (error) { showError(error); }
-    finally { setImporting(false); }
-  };
+  const calendarNotice: TextKey | null = calendarState.issue === 'storage' ? 'calendarStorageError'
+    : calendarState.update === 'checking' ? 'calendarChecking'
+    : calendarState.update === 'waiting' ? 'calendarWaiting'
+    : calendarState.update === 'failed' ? 'calendarUpdateFailed' : null;
 
   useEffect(() => {
     const element = panel.current;
@@ -98,6 +109,7 @@ export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, test
 
   const hide = () => { panel.current?.hidePopover(); setOpen(false); trigger.current?.focus({ preventScroll: true }); };
   return <div className="dtb-root dtb-theme" data-wide={wide} data-band={band}>
+    <ReminderBanner delivery={reminderDelivery} t={t} />
     <button type="button" className="dtb-chip" ref={trigger} popovertarget={id} popovertargetaction="toggle"
       aria-label={`${t('open')} · ${t(band)} · ${t(nextLabel)} ${countdownText}`}
       aria-expanded={open} aria-haspopup="dialog" aria-controls={id} title={`${t(band)} · ${t(nextLabel)} ${countdownText}`}>
@@ -125,35 +137,24 @@ export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, test
           <div><span><i className="dtb-dot dtb-offpeak" />{t('offpeak')}</span><b>{t('rest')}</b></div>
       </div>}
       {!day.covered && <p className="dtb-note">{t('unknownNote')}</p>}
-      {coverage.notice === 'expiresSoon' && <p className="dtb-note dtb-calendar-notice">{t('calendarExpiresSoon')} {coverage.expiresOn}</p>}
+      {calendarNotice && <p className="dtb-note dtb-calendar-notice" role="status">{t(calendarNotice)}</p>}
       <details className="dtb-details">
         <summary>{t('details')}</summary>
         <p className="dtb-note">{t('note')}</p>
         <div className="dtb-reminder-settings">
           <label className="dtb-reminder-toggle"><span>{t('reminder')}</span>
             <input type="checkbox" role="switch" checked={reminderState.enabled} disabled={reminderState.busy}
-              onChange={event => { void reminderStore.setEnabled(event.currentTarget.checked); }} />
+              onChange={event => {
+                if (event.currentTarget.checked) reminderDelivery.primeSound();
+                void reminderStore.setEnabled(event.currentTarget.checked);
+              }} />
           </label>
           {reminderState.enabled && <button type="button" className="dtb-button" onClick={testReminder}>{t('reminderTest')}</button>}
           <p className="dtb-note">{t('reminderHint')}</p>
+          {reminderNotice && <p className="dtb-note dtb-test-feedback" role="status">{t(deliveryMessages[reminderNotice.delivery])}</p>}
+          {reminderNotice?.sound === 'unavailable' && <p className="dtb-note dtb-sound-feedback" role="status">{t('reminderSoundError')}</p>}
           {reminderState.issue && <p className="dtb-note dtb-reminder-feedback" role="status">{t(reminderIssues[reminderState.issue])}</p>}
         </div>
-        <div className="dtb-calendar-meta">
-          <span>{t('calendar')} {calendarState.data.years.join('、')} · {t(calendarState.imported ? 'calendarLocal' : 'calendarBuiltin')}</span>
-          <span>{t('calendarVerified')} {calendarState.data.verifiedOn}</span>
-        </div>
-        <div className="dtb-calendar-actions">
-          <button type="button" className="dtb-button" disabled={importing} onClick={() => calendarInput.current?.click()}>{t('calendarImport')}</button>
-          <button type="button" className="dtb-button" disabled={importing || (!calendarState.imported && !calendarState.issue)} onClick={() => {
-            try { calendarStore.restore(); setFeedback('calendarRestored'); } catch (error) { showError(error); }
-          }}>{t('calendarRestore')}</button>
-          <a href={CALENDAR_DOWNLOAD} target="_blank" rel="noreferrer">{t('calendarDownload')} ↗</a>
-          <input type="file" accept=".json,application/json" ref={calendarInput} hidden aria-label={t('calendarImport')} onChange={event => {
-            const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; if (file) void importCalendar(file);
-          }} />
-        </div>
-        <p className="dtb-note">{t('calendarImportHint')}</p>
-        <p className="dtb-note dtb-calendar-feedback" role="status">{feedback ? t(feedback) : calendarState.issue ? t(calendarState.issue === 'invalid' ? 'calendarSavedInvalid' : 'calendarStorageError') : ''}</p>
         <footer className="dtb-footer"><a href={calendarState.data.source} target="_blank" rel="noreferrer">{t('calendarSource')} ↗</a><a href={PRICING_SOURCE} target="_blank" rel="noreferrer">{t('rule')} ↗</a></footer>
       </details>
     </div>, document.body)}

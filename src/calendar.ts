@@ -7,15 +7,20 @@ export interface HolidayCalendar {
   readonly source: string;
   readonly holidays: readonly (readonly [string, string])[];
 }
-export const CALENDAR_DOWNLOAD = 'https://github.com/a961282799-crypto/dsh-timeband/tree/main/calendars';
+export const CALENDAR_UPDATE_BASE = 'https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/';
 export const MAX_CALENDAR_BYTES = 64 * 1024;
+
+export function calendarUpdateUrl(year: number) {
+  if (!Number.isInteger(year) || year < 2000 || year > 9998) throw new CalendarError('invalid');
+  return `${CALENDAR_UPDATE_BASE}${year}.json`;
+}
 
 export class CalendarError extends Error {
   readonly kind: 'invalid' | 'storage';
   constructor(kind: 'invalid' | 'storage') { super(kind); this.kind = kind; }
 }
 
-function validDate(value: unknown): value is string {
+export function validDate(value: unknown): value is string {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00Z`);
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
@@ -51,3 +56,14 @@ export function parseCalendar(text: string): HolidayCalendar {
 
 /** Verified public-holiday intervals, inclusive; makeup weekends remain off-peak. */
 export const calendar = parseCalendar(JSON.stringify(bundled));
+
+/** Retain covered years, and never replace newer verified dates with older data. */
+export function mergeCalendars(current: HolidayCalendar, incoming: HolidayCalendar): HolidayCalendar {
+  const newer = incoming.verifiedOn >= current.verifiedOn;
+  const years = [...new Set([...current.years, ...incoming.years])].sort((a, b) => a - b);
+  const holidays = years.flatMap(year => {
+    const source = incoming.years.includes(year) && (newer || !current.years.includes(year)) ? incoming : current;
+    return source.holidays.filter(([start]) => Number(start.slice(0, 4)) === year);
+  });
+  return { ...(newer ? incoming : current), years, holidays };
+}
