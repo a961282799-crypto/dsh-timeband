@@ -64,6 +64,12 @@ test('avatar-right placement, popover, keyboard dismissal, theme, viewport, loca
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.screenshot({ path: 'artifacts/preview-dark.png' });
   await page.setViewportSize({ width: 390, height: 620 });
+  // Browser resize and ResizeObserver delivery settle asynchronously on CI.
+  // Check the resulting position, rather than a rectangle from the old viewport.
+  await expect.poll(async () => {
+    const box = await card.boundingBox();
+    return box!.y + box!.height;
+  }).toBeLessThanOrEqual(620);
   const bounds = await card.boundingBox();
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
