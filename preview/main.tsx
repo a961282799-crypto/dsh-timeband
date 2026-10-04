@@ -13,6 +13,7 @@ let pluginCleanup: (() => void)[] = [];
 let plugin: { apply: (ctx: unknown) => void };
 let dictionaries: { zh: Record<TextKey, string>; en: Record<TextKey, string> };
 let clock: { subscribe: (listener: () => void) => () => void; getSnapshot: () => number };
+let calendarStore: TimeBandProps['calendarStore'];
 const registry: Record<string, unknown> = { react: React, 'react-dom': ReactDOM, 'react/jsx-runtime': jsxRuntime };
 const params = new URLSearchParams(location.search);
 let instant = params.get('now') ? Date.parse(params.get('now')!) : Date.now();
@@ -21,7 +22,7 @@ const host = {
   locale: { register: (_namespace: string, values: typeof dictionaries) => { dictionaries = values; return () => undefined; } },
   slots: {
     inject: (_: string, fn: () => void) => fn(),
-    register: (options: { inject: () => { hooks: { clock: typeof clock } } }, component: typeof Component) => { Component = component; clock = options.inject().hooks.clock; },
+    register: (options: { inject: () => { hooks: { clock: typeof clock }; props: { calendarStore: typeof calendarStore } } }, component: typeof Component) => { Component = component; const injected = options.inject(); clock = injected.hooks.clock; calendarStore = injected.props.calendarStore; },
   },
 };
 (window as unknown as { __ModuleLoader__: unknown }).__ModuleLoader__ = {
@@ -39,7 +40,7 @@ function Preview() {
   const [now, setNow] = useState(instant);
   const clockNow = useSyncExternalStore(clock.subscribe, clock.getSnapshot);
   const dict = english ? dictionaries.en : dictionaries.zh;
-  const props = { wide, t: (key: TextKey) => dict[key], useClock: (select: (n: number) => number) => select(params.has('live') ? clockNow : now) } as TimeBandProps;
+  const props = { wide, calendarStore, t: (key: TextKey) => dict[key], useClock: (select: (n: number) => number) => select(params.has('live') ? clockNow : now) } as TimeBandProps;
   return <div className="preview-shell"><aside className={`preview-sidebar${wide ? '' : ' narrow'}`}>
     <div className="preview-brand">{wide ? 'DeepSeek Harness' : 'DS'}</div>
     {wide && <div className="preview-nav">＋ 新建对话<br />工作区<br />最近的对话</div>}

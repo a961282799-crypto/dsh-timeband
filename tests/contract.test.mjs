@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 function factory(path) {
   let registration;
   globalThis.window.__ModuleLoader__ = { load(value) { registration = value; } };
-  vm.runInNewContext(readFileSync(path, 'utf8'), { window: globalThis.window, console, document: globalThis.document, setInterval, clearInterval, setTimeout, clearTimeout });
+  vm.runInNewContext(readFileSync(path, 'utf8'), { window: globalThis.window, console, document: globalThis.document, URL, TextEncoder, setInterval, clearInterval, setTimeout, clearTimeout });
   assert.equal(typeof registration.factory, 'function');
   return registration;
 }

@@ -14,7 +14,9 @@ $DshCommand = $resolvedDsh.Source
 if ($Action -eq 'Remove') {
   & $DshCommand plugin --profile desktop remove dsh-timeband
 } else {
-  $packagePath = Join-Path $PSScriptRoot '../artifacts/dsh-timeband-1.0.2.tgz'
+  $manifestPath = Join-Path $PSScriptRoot '../package.json'
+  $timebandManifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+  $packagePath = Join-Path $PSScriptRoot "../artifacts/dsh-timeband-$($timebandManifest.version).tgz"
   if (-not (Test-Path -LiteralPath $packagePath)) { throw '缺少安装包，请先运行 npm pack --pack-destination artifacts。' }
   $packagePath = (Resolve-Path -LiteralPath $packagePath).Path
   & $DshCommand plugin --profile desktop add $packagePath

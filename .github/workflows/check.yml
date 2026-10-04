@@ -1,0 +1,26 @@
+name: Plugin checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chrome
+      - run: npm run compatibility
+      - run: npm run check
+      - uses: actions/upload-artifact@v7.0.1
+        if: failure()
+        with:
+          name: browser-test-results
+          path: test-results/
