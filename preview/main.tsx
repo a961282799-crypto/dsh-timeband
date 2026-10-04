@@ -17,11 +17,13 @@ let calendarStore: TimeBandProps['calendarStore'];
 let reminderStore: TimeBandProps['reminderStore'];
 let reminderDelivery: TimeBandProps['reminderDelivery'];
 let testReminder: TimeBandProps['testReminder'];
+let pluginUpdates: TimeBandProps['pluginUpdates'];
 const registry: Record<string, unknown> = { react: React, 'react-dom': ReactDOM, 'react/jsx-runtime': jsxRuntime };
 const params = new URLSearchParams(location.search);
 let activeLocale: 'zh' | 'en' = params.has('en') ? 'en' : 'zh';
 let instant = params.get('now') ? Date.parse(params.get('now')!) : Date.now();
 const host = {
+  get: (_name: string) => undefined,
   effect(fn: () => (() => void) | void) { const dispose = fn(); if (dispose) pluginCleanup.push(dispose); },
   locale: {
     register: (_namespace: string, values: typeof dictionaries) => { dictionaries = values; return () => undefined; },
@@ -35,7 +37,7 @@ const host = {
     inject: (_: string, fn: () => void) => fn(),
     // Host entry injection spreads plain fields directly into component props.
     // Only hooks/keyedHooks have special handling; there is no nested props seat.
-    register: (options: { inject: () => { hooks: { clock: typeof clock }; calendarStore: typeof calendarStore; reminderStore: typeof reminderStore; reminderDelivery: typeof reminderDelivery; testReminder: typeof testReminder } }, component: typeof Component) => { Component = component; const injected = options.inject(); clock = injected.hooks.clock; calendarStore = injected.calendarStore; reminderStore = injected.reminderStore; reminderDelivery = injected.reminderDelivery; testReminder = injected.testReminder; },
+    register: (options: { inject: () => { hooks: { clock: typeof clock }; calendarStore: typeof calendarStore; reminderStore: typeof reminderStore; reminderDelivery: typeof reminderDelivery; testReminder: typeof testReminder; pluginUpdates: typeof pluginUpdates } }, component: typeof Component) => { Component = component; const injected = options.inject(); clock = injected.hooks.clock; calendarStore = injected.calendarStore; reminderStore = injected.reminderStore; reminderDelivery = injected.reminderDelivery; testReminder = injected.testReminder; pluginUpdates = injected.pluginUpdates; },
   },
 };
 (window as unknown as { __ModuleLoader__: unknown }).__ModuleLoader__ = {
@@ -53,7 +55,7 @@ function Preview() {
   const [now, setNow] = useState(instant);
   const clockNow = useSyncExternalStore(clock.subscribe, clock.getSnapshot);
   const dict = english ? dictionaries.en : dictionaries.zh;
-  const props = { wide, calendarStore, reminderStore, reminderDelivery, testReminder, t: (key: TextKey) => dict[key], useClock: (select: (n: number) => number) => select(params.has('live') ? clockNow : now) } as TimeBandProps;
+  const props = { wide, calendarStore, reminderStore, reminderDelivery, testReminder, pluginUpdates, t: (key: TextKey) => dict[key], useClock: (select: (n: number) => number) => select(params.has('live') ? clockNow : now) } as TimeBandProps;
   return <div className="preview-shell"><aside className={`preview-sidebar${wide ? '' : ' narrow'}`}>
     <div className="preview-brand">{wide ? 'DeepSeek Harness' : 'DS'}</div>
     {wide && <div className="preview-nav">＋ 新建对话<br />工作区<br />最近的对话</div>}

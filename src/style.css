@@ -95,6 +95,10 @@ div:has(> div > .dtb-root[data-wide='true']:only-child):has(> div button[data-co
 .dtb-calendar-notice { border-left: 2px solid var(--dtb-peak); padding-left: 9px; }
 .dtb-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-top: 3px; font-size: 10px; color: var(--dtb-muted); }
 .dtb-footer a { color: inherit; text-decoration: none; }
+.dtb-update-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 0; border-top: 1px solid var(--dtb-line); font-size: 11px; }
+.dtb-update-notice p { flex-basis: 100%; margin: 0; }
+.dtb-update-notice a { color: var(--dtb-green); text-decoration: none; }
+.dtb-version-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 10px; color: var(--dtb-secondary); }
 .dtb-footer a:hover { text-decoration: underline; }
 @media (prefers-color-scheme: dark) {
   .dtb-theme { --dtb-secondary: var(--dsw-alias-label-secondary, #b6bfb6); }

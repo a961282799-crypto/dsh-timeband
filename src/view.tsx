@@ -6,6 +6,8 @@ import { countdown, createScheduleReader, HOUR, PRICING_SOURCE } from './schedul
 import type { CalendarStore } from './calendar-store.ts';
 import type { ReminderIssue, ReminderStore } from './reminder-store.ts';
 import type { DeliveryStatus, ReminderDelivery } from './reminder-delivery.ts';
+import { newer } from './plugin-updates.ts';
+import type { PluginUpdates } from './plugin-updates.ts';
 import type { Segment } from './schedule.ts';
 import type { TextKey } from './locales.ts';
 
@@ -15,6 +17,7 @@ export type TimeBandProps = PropsRuntime<'sidebar.footer.action'> & PropsLocale<
   reminderStore: ReminderStore;
   reminderDelivery: ReminderDelivery;
   testReminder: () => void;
+  pluginUpdates: PluginUpdates;
 };
 
 const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
@@ -50,11 +53,17 @@ function Track({ segments, hour, small = false }: { segments: Segment[]; hour: n
   </div>;
 }
 
-export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, reminderDelivery, testReminder }: TimeBandProps) {
+export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, reminderDelivery, testReminder, pluginUpdates }: TimeBandProps) {
   const now = useClock(value => value);
   const calendarState = useSyncExternalStore(calendarStore.subscribe, calendarStore.getSnapshot);
   const reminderState = useSyncExternalStore(reminderStore.subscribe, reminderStore.getSnapshot);
   const reminderNotice = useSyncExternalStore(reminderDelivery.subscribe, reminderDelivery.getSnapshot);
+  const updateState = useSyncExternalStore(pluginUpdates.subscribe, pluginUpdates.getSnapshot);
+  const available = updateState.latest && newer(updateState.latest.version, pluginUpdates.version);
+  const installMessage: TextKey | null = updateState.install === 'restart' ? 'updateRestart'
+    : updateState.install === 'applied' ? 'updateApplied'
+    : updateState.install === 'unknown' ? 'updateUnknown' : updateState.install === 'failed' ? 'updateFailed'
+    : updateState.install === 'incompatible' ? 'updateIncompatible' : null;
   const readSchedule = useMemo(() => createScheduleReader(), []);
   const { day, band, next, segments } = readSchedule(now, calendarState.data);
   const hour = (now - day.midnight) / HOUR;
@@ -155,6 +164,18 @@ export function TimeBand({ wide, useClock, t, calendarStore, reminderStore, remi
           {reminderNotice?.sound === 'unavailable' && <p className="dtb-note dtb-sound-feedback" role="status">{t('reminderSoundError')}</p>}
           {reminderState.issue && <p className="dtb-note dtb-reminder-feedback" role="status">{t(reminderIssues[reminderState.issue])}</p>}
         </div>
+        <div className="dtb-version-row"><span>v{pluginUpdates.version}</span>
+          <button type="button" className="dtb-button" disabled={updateState.check === 'checking' || updateState.install === 'installing'} onClick={() => { void pluginUpdates.check(); }}>{t(updateState.check === 'checking' ? 'updateChecking' : 'updateCheck')}</button></div>
+        {available && <div className="dtb-update-notice" role="status">
+          <span>{t('updateAvailable')} <b>v{updateState.latest!.version}</b></span>
+          {pluginUpdates.canInstall() ? <button type="button" className="dtb-button" disabled={updateState.check === 'checking' || ['installing', 'restart', 'applied', 'unknown'].includes(updateState.install)}
+            onClick={() => { void pluginUpdates.install(); }}>{t(updateState.install === 'installing' ? 'updateInstalling' : 'updateInstall')}</button>
+            : <a href={updateState.latest!.download} target="_blank" rel="noreferrer">{t('updateDownload')} ↗</a>}
+          <a href={updateState.latest!.url} target="_blank" rel="noreferrer">{t('updateNotes')} ↗</a>
+          {installMessage && <p className="dtb-note">{t(installMessage)}</p>}
+        </div>}
+        {updateState.check === 'failed' && <p className="dtb-note">{t('updateCheckFailed')}</p>}
+        {updateState.check === 'current' && !available && <p className="dtb-note">{t('updateCurrent')}</p>}
         <footer className="dtb-footer"><a href={calendarState.data.source} target="_blank" rel="noreferrer">{t('calendarSource')} ↗</a><a href={PRICING_SOURCE} target="_blank" rel="noreferrer">{t('rule')} ↗</a></footer>
       </details>
     </div>, document.body)}

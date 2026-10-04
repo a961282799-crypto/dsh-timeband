@@ -10,7 +10,7 @@ import * as jsxRuntime from 'react/jsx-runtime';
  * injection, observable hooks, React mounting and Cordis lifetimes are real. */
 type ClientPlugin = Parameters<Cordis.Context['plugin']>[0];
 type HostApi = { unload: () => Promise<void>; reload: () => Promise<void> };
-declare global { interface Window { timebandHost?: HostApi } }
+declare global { interface Window { timebandHost?: HostApi; timebandUpdateManager?: unknown } }
 
 const modules: Record<string, unknown> = {
   '@deepseek-ai/cordis': Cordis,
@@ -41,6 +41,11 @@ async function start() {
   await loadScript('/host-renderer.js');
   await loadScript('/client.js');
   const root = new Cordis.Context();
+  // Tests supply the public remote facade. They never install a real package.
+  if (window.timebandUpdateManager) {
+    root.provide('remote', { pluginManager: window.timebandUpdateManager });
+    root.provide('remote.pluginManager', window.timebandUpdateManager);
+  }
   await root.plugin(modules['@deepseek-ai/dsh-client-ui-renderer'] as ClientPlugin).await();
   const dictionaries = new Map<string, Record<string, string>>();
   const locale = {

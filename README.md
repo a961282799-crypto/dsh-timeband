@@ -1,6 +1,6 @@
 # DSH TimeBand
 
-**v1.3.2** 支持日历到期前 30 天自动联网更新、应用内提醒、系统通知发送反馈和约半秒的轻柔提示音。修复了真实桌面宿主中的显示问题，并精简安装包；提示音在本地合成，不下载音频文件，不增加运行依赖。
+**v1.3.3** 在「规则与提醒」中增加手动「检查更新」与「更新」按钮。点击后才联网查询，有新版再手动安装。保留日历到期前 30 天自动联网更新、应用内提醒、系统通知发送反馈和约半秒的轻柔提示音；没有新增运行时 npm 依赖。
 
 DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒计时、迷你时间轴常驻；点击查看北京时间 24 小时时间轴。没有价格、消费金额、Token、余额或预计节省功能，也不读取账户或 API Key。
 
@@ -50,20 +50,20 @@ DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒
 
 已针对 **DeepSeek Harness 0.2.0-rc.2** 制作。2026-10-04 核对 npm `latest` 仍为此版本，四个宿主测试依赖与随附桌面 CLI 版本一致。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
 
-新版 **v1.3.2** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
+新版 **v1.3.3** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
 
-从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.2) 下载预构建安装包 `dsh-timeband-1.3.2.tgz`。不需要安装开发依赖或自行编译。
+从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.3) 下载预构建安装包 `dsh-timeband-1.3.3.tgz`。不需要安装开发依赖或自行编译。
 
 从托盘完全退出 Harness，在下载目录执行：
 
 ```powershell
-dsh plugin --profile desktop add ./dsh-timeband-1.3.2.tgz
+dsh plugin --profile desktop add ./dsh-timeband-1.3.3.tgz
 ```
 
 如果 `dsh` 不在 PATH，使用桌面端安装目录中随附的命令，例如：
 
 ```powershell
-& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.3.2.tgz
+& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.3.3.tgz
 ```
 
 安装后重新打开 Harness，侧栏底部即可看到插件。卸载：
@@ -117,6 +117,16 @@ Web 版可改成 `--profile web`，组件显示在侧栏底部原生插槽。
 展开「规则与提醒」，开启「峰时段前 5 分钟提醒」。只有手动开启时才申请系统通知权限；被拒绝、接口不支持或设置无法保存时，开关保持关闭并给出说明。允许通知后，可点击「测试提醒」立即显示应用内提示并检查系统通知的发送状态，测试不会改写峰时段的去重记录。5 秒没有系统回执时说明「未确认通知显示」；发送失败时保留应用内提醒，开关仍保持开启。
 
 提醒使用北京时间与当前日历，在 09:00、14:00 峰时段开始前的 5 分钟窗口内发送一次。节假日、周末和待核实的峰时段不发送确定提醒；窗口内开启或唤醒会提醒尚未开始的峰时段，已经开始则不补发。应用需要保持运行，退出后无法继续提醒。系统通知的展示还受宿主及操作系统设置影响，详见[提醒说明](https://github.com/a961282799-crypto/dsh-timeband/blob/main/docs/reminders.md)。
+
+## 插件版本更新（v1.3.3 起）
+
+展开「规则与提醒」，点击「检查更新」后查询本项目的 GitHub 最新正式 Release。有新版时在同一区域显示「更新」与更新说明；没有新版则给出检查结果。只有点击「更新」才安装，完成后按 Harness 的结果提示完全退出并重新打开应用。日历仍按原规则自动更新，插件版本只在点击按钮时检查。
+
+支持官方插件管理服务的 Harness 中，点击「更新」由 `remote.pluginManager.installBundle` 安装该版本固定地址的 GitHub 预构建包；已安装插件的升级按官方结果提示重启生效，不自动退出应用。版本兼容检查由宿主执行，不授予版本豁免或构建脚本许可。网络回执丢失时查询原请求的结果，不重新提交；仍未确认时提示到 Harness「插件」页面核对。插件卸载时取消自己尚在运行的安装请求。
+
+不提供官方远程安装服务的环境显示「下载新版」及更新说明。旧版需要先安装包含此功能的版本，之后才有「检查更新」和「更新」按钮。更新通过 GitHub 预构建包分发，不依赖 npm 发布。
+
+检查只请求 `https://api.github.com/repos/a961282799-crypto/dsh-timeband/releases/latest`，不携带账户凭证；限制 10 秒与 64 KB，失败后可手动重试。只接受本项目的正式版本及对应预构建包，预发布、草稿和不匹配的资源不用于更新。启动、窗口唤醒和普通使用不会触发插件版本查询，也不新增后台任务、缓存或首页提示点。
 
 ## 架构
 
