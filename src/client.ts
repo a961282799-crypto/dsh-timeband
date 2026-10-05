@@ -41,7 +41,7 @@ export function apply(ctx: Context): void {
   } });
   const testReminder = () => {
     if (!reminderStore.getSnapshot().enabled) return;
-    reminderDelivery.primeSound();
+    void reminderDelivery.primeSound();
     const t = ctx.locale.bind('timeband');
     try { reminderDelivery.show(t('reminderTestTitle'), t('reminderTestBody'), 'dsh-timeband-test'); }
     catch { reminderStore.fail('delivery'); }
@@ -52,16 +52,29 @@ export function apply(ctx: Context): void {
   ctx.effect(() => reminderStore.start());
   ctx.effect(() => reminders.start());
   ctx.effect(() => () => pluginUpdates.dispose());
-  ctx.effect(() => reminderStore.subscribe(() => { if (!reminderStore.getSnapshot().enabled) reminderDelivery.dismiss(); }));
   ctx.effect(() => {
-    // Restore audio readiness after reload using ordinary user interaction.
-    const prime = () => { if (reminderStore.getSnapshot().enabled) reminderDelivery.primeSound(); };
-    document.addEventListener('pointerdown', prime, true);
-    document.addEventListener('keydown', prime, true);
-    return () => {
+    // Restore audio readiness once after reload, then remove gesture listeners.
+    let active = true, enabled = false;
+    const detach = () => {
       document.removeEventListener('pointerdown', prime, true);
       document.removeEventListener('keydown', prime, true);
     };
+    const prime = () => {
+      if (enabled) void reminderDelivery.primeSound().then(ready => { if (active && ready) detach(); });
+    };
+    const changed = () => {
+      const state = reminderStore.getSnapshot();
+      if (!state.enabled && !state.busy) reminderDelivery.releaseSound();
+      if (enabled === state.enabled) return;
+      enabled = state.enabled;
+      if (enabled) {
+        document.addEventListener('pointerdown', prime, true);
+        document.addEventListener('keydown', prime, true);
+      } else detach();
+    };
+    const unsubscribe = reminderStore.subscribe(changed);
+    changed();
+    return () => { active = false; detach(); unsubscribe(); };
   });
   ctx.effect(() => () => reminderDelivery.dispose());
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({

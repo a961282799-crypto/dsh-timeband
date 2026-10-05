@@ -4,42 +4,70 @@ const RESUME_TIMEOUT = 1_000;
 export function createReminderSound(create: () => AudioContext = () => new AudioContext()) {
   let context: AudioContext | undefined, disposed = false, generation = 0;
   let cancelResume: (() => void) | undefined, stopTone: (() => void) | undefined;
+  let unlocked = false, priming: Promise<boolean> | undefined;
   const audio = () => {
     if (!context || context.state === 'closed') context = create();
     return context;
   };
-  const stop = () => {
+  const cancel = () => {
     generation++;
     cancelResume?.(); cancelResume = undefined;
     stopTone?.(); stopTone = undefined;
   };
+  const pause = (ctx = context) => {
+    if (!ctx || ctx !== context || stopTone || ctx.state === 'closed') return;
+    try { void ctx.suspend().catch(() => {}); } catch {}
+  };
+  const stop = () => { cancel(); pause(); };
+  const release = () => {
+    cancel();
+    const previous = context;
+    context = undefined; unlocked = false; priming = undefined;
+    try { if (previous && previous.state !== 'closed') void previous.close().catch(() => {}); } catch {}
+  };
+  const resume = (ctx: AudioContext, operation: number) => new Promise<boolean>(resolve => {
+    let settled = false;
+    const done = (value: boolean) => {
+      if (settled) return;
+      settled = true; clearTimeout(timer);
+      if (cancelResume === cancelPending) cancelResume = undefined;
+      resolve(value);
+    };
+    const cancelPending = () => done(false);
+    const timer = setTimeout(() => done(false), RESUME_TIMEOUT);
+    cancelResume = cancelPending;
+    // Always enqueue resume, even if a previous suspend has not settled yet.
+    try { void ctx.resume().then(() => {
+      const current = !disposed && context === ctx && operation === generation;
+      if (settled || !current) { if (current && !stopTone) pause(ctx); done(false); return; }
+      unlocked = ctx.state === 'running'; done(unlocked);
+    }, () => done(false)); } catch { done(false); }
+  });
   return {
     // Call directly from enabling or another user gesture, before awaiting
     // notification permission. This unlocks later background reminders.
-    prime() {
-      if (disposed) return;
-      try { const ctx = audio(); if (ctx.state !== 'running') void ctx.resume().catch(() => {}); } catch {}
+    prime(): Promise<boolean> {
+      if (disposed) return Promise.resolve(false);
+      if (unlocked) return Promise.resolve(true);
+      if (priming) return priming;
+      try {
+        const ctx = audio(), operation = generation;
+        const pending = resume(ctx, operation).then(ready => {
+          if (operation === generation) pause(ctx);
+          if (priming === pending) priming = undefined;
+          return ready;
+        });
+        priming = pending;
+        return pending;
+      } catch { return Promise.resolve(false); }
     },
     async play(): Promise<boolean> {
       if (disposed) return false;
-      stop();
+      cancel();
       const operation = generation;
       try {
         const ctx = audio();
-        if (ctx.state !== 'running') {
-          const ready = await new Promise<boolean>(resolve => {
-            let settled = false;
-            const done = (value: boolean) => {
-              if (settled) return;
-              settled = true; clearTimeout(timer); cancelResume = undefined; resolve(value);
-            };
-            const timer = setTimeout(() => done(false), RESUME_TIMEOUT);
-            cancelResume = () => done(false);
-            try { void ctx.resume().then(() => done(ctx.state === 'running'), () => done(false)); }
-            catch { done(false); }
-          });
-          if (!ready) return false;
-        }
+        if (!await resume(ctx, operation)) return false;
         if (disposed || operation !== generation || ctx.state !== 'running') return false;
         const oscillator = ctx.createOscillator(), gain = ctx.createGain();
         const at = ctx.currentTime + .01;
@@ -60,16 +88,15 @@ export function createReminderSound(create: () => AudioContext = () => new Audio
           oscillator.disconnect(); gain.disconnect();
         };
         stopTone = release;
-        oscillator.onended = () => { release(); if (operation === generation) stopTone = undefined; };
+        oscillator.onended = () => { release(); if (operation === generation) { stopTone = undefined; pause(ctx); } };
         oscillator.start(at); oscillator.stop(at + .56);
         return true;
-      } catch { stopTone?.(); stopTone = undefined; return false; }
+      } catch { if (operation === generation) stop(); return false; }
     },
     stop,
+    release,
     dispose() {
-      disposed = true; stop();
-      try { if (context && context.state !== 'closed') void context.close().catch(() => {}); } catch {}
-      context = undefined;
+      disposed = true; release();
     },
   };
 }

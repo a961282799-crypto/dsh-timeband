@@ -1,8 +1,10 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { RELEASE_API, RELEASES_URL } from '../../src/plugin-updates.ts';
+import packageInfo from '../../package.json' with { type: 'json' };
 
-const version = '1.3.4'; // Simulated release, not a published artifact.
+const currentVersion = packageInfo.version;
+const version = '1.3.5'; // Simulated release, not a published artifact.
 const fixture = { tag_name: `v${version}`, draft: false, prerelease: false, html_url: `${RELEASES_URL}/tag/v${version}`,
   assets: [{ name: `dsh-timeband-${version}.tgz`, state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v${version}/dsh-timeband-${version}.tgz` }],
 };
@@ -80,7 +82,7 @@ test('transport recovery and host compatibility rejection display different trut
 test('manual retry handles offline, prereleases and current versions; English dark settings fit a narrow window', async ({ page }) => {
   let response: 'offline' | 'prerelease' | 'current' | 'stable' = 'offline';
   await page.route(RELEASE_API, route => response === 'offline' ? route.abort('internetdisconnected') : route.fulfill({ json: {
-    ...fixture, ...(response === 'current' ? { tag_name: 'v1.3.3', html_url: `${RELEASES_URL}/tag/v1.3.3`, assets: [{ name: 'dsh-timeband-1.3.3.tgz', state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v1.3.3/dsh-timeband-1.3.3.tgz` }] } : {}),
+    ...fixture, ...(response === 'current' ? { tag_name: `v${currentVersion}`, html_url: `${RELEASES_URL}/tag/v${currentVersion}`, assets: [{ name: `dsh-timeband-${currentVersion}.tgz`, state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v${currentVersion}/dsh-timeband-${currentVersion}.tgz` }] } : {}),
     prerelease: response === 'prerelease',
   } }));
   await page.goto('/'); await check(page);

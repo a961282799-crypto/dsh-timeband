@@ -40,6 +40,12 @@ v1.3.2 使用原生 Web Audio 合成轻柔两音，正式与测试提醒共用�
 
 版本检查使用原生 Fetch，额外声明宿主已提供的 `@deepseek-ai/dsh-api-remotes` 客户端依赖，没有打包额外 SDK 或 React。官方安装契约核对了本机随附 rc.2 的 `dsh-plugin-manager` 和 `dsh-client-ui-plugin-manager`：使用 `ctx.remote.pluginManager.installBundle`、`waitForInstall` 与 `cancelInstall`；对已安装包，宿主返回 `restart-required`。本地 v1.3.3 已在应用退出后经官方 CLI 安装到真实桌面端，五项运行/配置文件与构建源逐字节一致，其他 profile 依赖及 bundles 保持原有值。重新打开后确认版本与按钮显示正常，实际点击「检查更新」后成功返回「暂无需要安装的新版」。浏览器中的 v1.3.4 是模拟 Release，安装服务也是受控替身；尚未在真实桌面执行下载更新至更高版本。新版通过 GitHub 预构建包分发，npm 保留 v1.1.0。
 
+## v1.3.4：资源优化
+
+2026-10-05，本机随附 CLI 仍为 0.2.0-rc.2。类型检查、构建、59 项 Node 检查及 35 项 Chrome 检查通过。详情关闭后卸载内容并保留设置展开状态；倒计时独立按秒更新，时间轴按分钟更新；空闲音频暂停，关闭提醒后释放上下文，重新开启可恢复声音。基准结果与测量边界见[资源优化记录](performance.md)。
+
+已通过官方 CLI 安装本地 v1.3.4，5 项运行/配置文件哈希一致，原有其他插件依赖和 bundles 不变。v1.3.4 通过 GitHub 预构建包分发，npm 版本不变；正式包与本地验收版的运行代码一致，发布准备只更新说明文档。旧版安装包保留供回退。
+
 ## 检查新宿主
 
 运行 `npm run compatibility`，检查最新正式标签及本机测试依赖。GitHub Plugin checks 在 push、PR 或手动触发时也会执行；版本不一致会失败并显示待验证版本。

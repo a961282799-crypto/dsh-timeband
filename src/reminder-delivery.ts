@@ -36,6 +36,7 @@ export function createReminderDelivery(
     getSnapshot: () => snapshot,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     primeSound: () => sound.prime(),
+    releaseSound() { dismiss(); sound.release(); },
     show(title: string, body: string, tag: string) {
       if (disposed) return;
       clear();

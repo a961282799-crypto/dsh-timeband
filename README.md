@@ -1,6 +1,8 @@
 # DSH TimeBand
 
-**v1.3.3** 在「规则与提醒」中增加手动「检查更新」与「更新」按钮。点击后才联网查询，有新版再手动安装。保留日历到期前 30 天自动联网更新、应用内提醒、系统通知发送反馈和约半秒的轻柔提示音；没有新增运行时 npm 依赖。
+**v1.3.4** 关闭详情后释放面板内容，秒级刷新只影响倒计时区域，时间轴按分钟更新。提示音播放后暂停音频处理，关闭提醒时释放音频上下文；重新开启后可以再次播放。保留手动版本检查、日历自动更新、应用内提醒、系统通知反馈和轻柔提示音，没有新增运行时 npm 依赖。
+
+三轮本地对照中，测试页面的 JavaScript 堆占用减少约 0.07～0.15 MB，主线程耗时降低约 11%～19%。这是 Chrome 宿主模拟页的结果，不代表 Harness 整个进程的内存或 CPU 降幅，详见[资源优化记录](https://github.com/a961282799-crypto/dsh-timeband/blob/main/docs/performance.md)。
 
 DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒计时、迷你时间轴常驻；点击查看北京时间 24 小时时间轴。没有价格、消费金额、Token、余额或预计节省功能，也不读取账户或 API Key。
 
@@ -48,22 +50,22 @@ DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒
 
 ## 安装
 
-已针对 **DeepSeek Harness 0.2.0-rc.2** 制作。2026-10-04 核对 npm `latest` 仍为此版本，四个宿主测试依赖与随附桌面 CLI 版本一致。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
+已针对 **DeepSeek Harness 0.2.0-rc.2** 制作。2026-10-05 核对 npm `latest` 仍为此版本，四个宿主测试依赖与随附桌面 CLI 版本一致。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
 
-新版 **v1.3.3** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
+新版 **v1.3.4** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
 
-从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.3) 下载预构建安装包 `dsh-timeband-1.3.3.tgz`。不需要安装开发依赖或自行编译。
+从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.4) 下载预构建安装包 `dsh-timeband-1.3.4.tgz`。不需要安装开发依赖或自行编译。
 
 从托盘完全退出 Harness，在下载目录执行：
 
 ```powershell
-dsh plugin --profile desktop add ./dsh-timeband-1.3.3.tgz
+dsh plugin --profile desktop add ./dsh-timeband-1.3.4.tgz
 ```
 
 如果 `dsh` 不在 PATH，使用桌面端安装目录中随附的命令，例如：
 
 ```powershell
-& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.3.3.tgz
+& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.3.4.tgz
 ```
 
 安装后重新打开 Harness，侧栏底部即可看到插件。卸载：

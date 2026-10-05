@@ -7,6 +7,7 @@ declare global {
     __reminderInstances: { onerror: ((event: Event) => unknown) | null; onshow: ((event: Event) => unknown) | null }[];
     __reminderRequests: number;
     __reminderPermission: string;
+    __reminderNow: number;
     __timebandAudio: { context: AudioContext; analyser: AnalyserNode; starts: number; active: Set<OscillatorNode>; peak: number }[];
   }
 }
@@ -238,4 +239,35 @@ test('unavailable audio reports the issue while keeping native and in-app remind
   await expect(page.locator('.dtb-reminder-banner')).toBeVisible();
   await expect(page.locator('.dtb-reminder-banner .dtb-sound-feedback')).toContainText('提示音未能播放');
   await expect(toggle(page)).toBeChecked(); expect(await count(page)).toBe(1);
+});
+
+test('idle audio suspends, a scheduled reminder resumes it, and disabling releases it until enabled again', async ({ page, context }) => {
+  await stub(context); await observeAudio(context);
+  // Keep native timers and activation expiry real; only the scheduling wall clock is controlled.
+  await page.addInitScript(() => {
+    window.__reminderNow = Date.parse('2026-09-30T08:54:59+08:00');
+    Date.now = () => window.__reminderNow;
+  });
+  await page.goto('/host'); await open(page);
+  await toggle(page).check();
+  await expect.poll(() => page.evaluate(() => window.__timebandAudio[0]?.context.state)).toBe('suspended');
+  await page.keyboard.press('Escape');
+  // Ordinary interaction must not restart audio processing after it was unlocked.
+  await page.getByRole('button', { name: '模拟账户' }).click();
+  await expect.poll(() => page.evaluate(() => window.__timebandAudio[0]?.context.state)).toBe('suspended');
+  // Playwright evaluate uses a user gesture. Read through CDP without injecting one.
+  const cdp = await context.newCDPSession(page);
+  const inspect = async (expression: string) => (await cdp.send('Runtime.evaluate', { expression, returnByValue: true, userGesture: false })).result.value;
+  await expect.poll(() => inspect('navigator.userActivation.isActive'), { timeout: 10_000 }).toBe(false);
+  await inspect('window.__reminderNow += 1000');
+  await expect.poll(() => inspect('window.__timebandAudio[0]?.starts')).toBe(1);
+  await expect.poll(() => inspect('window.__timebandAudio[0]?.context.state')).toBe('suspended');
+  await open(page);
+  await toggle(page).uncheck();
+  await expect.poll(() => page.evaluate(() => window.__timebandAudio.every(record => record.context.state === 'closed'))).toBe(true);
+  await toggle(page).check();
+  await page.getByRole('button', { name: '测试提醒', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.__timebandAudio[1]?.starts)).toBe(1);
+  await expect.poll(() => page.evaluate(() => window.__timebandAudio[1]?.context.state)).toBe('suspended');
+  await expect(page.locator('.dtb-sound-feedback')).toHaveCount(0);
 });
