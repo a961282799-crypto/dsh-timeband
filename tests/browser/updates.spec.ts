@@ -4,7 +4,7 @@ import { RELEASE_API, RELEASES_URL } from '../../src/plugin-updates.ts';
 import packageInfo from '../../package.json' with { type: 'json' };
 
 const currentVersion = packageInfo.version;
-const version = '1.3.5'; // Simulated release, not a published artifact.
+const version = '1.3.6'; // Simulated release, not a published artifact.
 const fixture = { tag_name: `v${version}`, draft: false, prerelease: false, html_url: `${RELEASES_URL}/tag/v${version}`,
   assets: [{ name: `dsh-timeband-${version}.tgz`, state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v${version}/dsh-timeband-${version}.tgz` }],
 };

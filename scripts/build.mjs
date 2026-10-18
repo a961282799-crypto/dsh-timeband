@@ -13,4 +13,4 @@ await build({
   banner: { js: `window.__ModuleLoader__.load({id:${JSON.stringify(pkg.name)},factory:function(require){var module={exports:{}};var exports=module.exports;` },
   footer: { js: 'return module.exports;}});' },
 });
-console.log(`Built ${pkg.name}@${pkg.version} for DSH 0.2.0-rc.2`);
+console.log(`Built ${pkg.name}@${pkg.version} for DSH ${pkg.peerDependencies['@deepseek-ai/dsh']}`);
