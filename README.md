@@ -1,6 +1,6 @@
 # DSH TimeBand
 
-**v1.3.5** 适配 DeepSeek Harness 0.2.1-rc.2，修复宿主升级后因旧版兼容声明而拒绝加载的问题。保留 v1.3.4 的资源优化：关闭详情后释放面板内容，秒级刷新只影响倒计时区域，时间轴按分钟更新。提示音播放后暂停音频处理，关闭提醒时释放音频上下文；重新开启后可以再次播放。保留手动版本检查、日历自动更新、应用内提醒、系统通知反馈和轻柔提示音，没有新增运行时 npm 依赖。
+**v1.3.6** 适配 DeepSeek Harness 0.2.1-rc.3，修复宿主升级后因旧版兼容声明而拒绝加载的问题。保留 v1.3.4 的资源优化：关闭详情后释放面板内容，秒级刷新只影响倒计时区域，时间轴按分钟更新。提示音播放后暂停音频处理，关闭提醒时释放音频上下文；重新开启后可以再次播放。保留手动版本检查、日历自动更新、应用内提醒、系统通知反馈和轻柔提示音，没有新增运行时 npm 依赖。
 
 三轮本地对照中，测试页面的 JavaScript 堆占用减少约 0.07～0.15 MB，主线程耗时降低约 11%～19%。这是 Chrome 宿主模拟页的结果，不代表 Harness 整个进程的内存或 CPU 降幅，详见[资源优化记录](https://github.com/a961282799-crypto/dsh-timeband/blob/main/docs/performance.md)。
 
@@ -50,22 +50,22 @@ DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒
 
 ## 安装
 
-已针对 **DeepSeek Harness 0.2.1-rc.2** 验证。2026-10-17 核对四个宿主测试依赖与随附桌面 CLI 版本一致，Cordis 同步至 4.0.5。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
+已针对 **DeepSeek Harness 0.2.1-rc.3** 验证。2026-10-24 核对四个宿主测试依赖与随附桌面 CLI 版本一致，Cordis 同步至 4.0.5。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
 
-新版 **v1.3.5** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
+新版 **v1.3.6** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
 
-从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.5) 下载预构建安装包 `dsh-timeband-1.3.5.tgz`。不需要安装开发依赖或自行编译。
+从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.6) 下载预构建安装包 `dsh-timeband-1.3.6.tgz`。不需要安装开发依赖或自行编译。
 
 从托盘完全退出 Harness，在下载目录执行：
 
 ```powershell
-dsh plugin --profile desktop add ./dsh-timeband-1.3.5.tgz
+dsh plugin --profile desktop add ./dsh-timeband-1.3.6.tgz
 ```
 
 如果 `dsh` 不在 PATH，使用桌面端安装目录中随附的命令，例如：
 
 ```powershell
-& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.3.5.tgz
+& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.3.6.tgz
 ```
 
 安装后重新打开 Harness，侧栏底部即可看到插件。卸载：
@@ -138,7 +138,7 @@ TypeScript 7 + React 18（宿主共享实例）+ Cordis 官方插槽生命周期
 
 `src/schedule.ts` 是纯时间逻辑及按时段复用的日程读取器；`calendar.ts` 校验并合并日历，`calendar-feed.ts` 将公告数据转换为计费假期，`calendar-store.ts` 负责本地持久化与窗口同步，`calendar-updater.ts` 负责到期检查、限量下载、每日重试和卸载取消；`clock.ts` 是单一可订阅时钟，隐藏时暂停，唤醒时重读系统时间；`reminder-store.ts` 管理提醒偏好与用户触发的授权，`reminders.ts` 在开启时保留一个截止时间计时器，重新核对日历、墙钟和发送记录；`reminder-delivery.ts` 保留应用内提醒并监测系统通知回执，`reminder-sound.ts` 合成提示音并管理播放与清理；`client.ts` 持有注册、字典及清理；`view.tsx` 接收宿主注入的状态、时钟和翻译函数。`cordis.patch.yml` 与 `dsh.bundle` 负责安装后进入宿主配置。
 
-接口依据：[官方 Client Slots](https://deepseek-harness.github.io/deepseek-harness/en/reference/subsystems/slots)、npm 发布的 `0.2.1-rc.2` 类型与 SlotRegistry，以及本机同版本桌面的兼容检查函数。头像旁布局保留结构匹配保护，不承诺未测试版本兼容。
+接口依据：[官方 Client Slots](https://deepseek-harness.github.io/deepseek-harness/en/reference/subsystems/slots)、npm 发布的 `0.2.1-rc.3` 类型与 SlotRegistry，以及本机同版本桌面的兼容检查函数。头像旁布局保留结构匹配保护，不承诺未测试版本兼容。
 
 ## 开发与验证
 
