@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import vm from 'node:vm';
 import { Context } from '@deepseek-ai/cordis';
 const require = createRequire(import.meta.url);
+const packageInfo = JSON.parse(readFileSync('package.json', 'utf8'));
 
 function factory(path) {
   let registration;
@@ -29,7 +30,8 @@ test('built artifact mounts in real rc.2 Cordis/SlotRegistry, follows slot lifet
     const rendererRegistration = factory(require.resolve('@deepseek-ai/dsh-client-ui-renderer/client'));
     const { SlotRegistry } = rendererRegistration.factory(require);
     const registration = factory('dist/client.js');
-    assert.equal(registration.id, 'dsh-timeband');
+    assert.equal(registration.id, packageInfo.name);
+    assert.ok(readFileSync('cordis.patch.yml', 'utf8').includes(`name: '${packageInfo.name}'`));
     const requests = [];
     const plugin = registration.factory(id => { requests.push(id); return require(id); });
     assert.ok(requests.every(id => ['react', 'react-dom', 'react/jsx-runtime'].includes(id)));

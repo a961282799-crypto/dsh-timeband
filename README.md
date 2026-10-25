@@ -1,6 +1,6 @@
 # DSH TimeBand
 
-**v1.3.6** 适配 DeepSeek Harness 0.2.1-rc.3，修复宿主升级后因旧版兼容声明而拒绝加载的问题。保留 v1.3.4 的资源优化：关闭详情后释放面板内容，秒级刷新只影响倒计时区域，时间轴按分钟更新。提示音播放后暂停音频处理，关闭提醒时释放音频上下文；重新开启后可以再次播放。保留手动版本检查、日历自动更新、应用内提醒、系统通知反馈和轻柔提示音，没有新增运行时 npm 依赖。
+**v1.3.7** 使用 npm 包名 `@a961282799/dsh-timeband`，同步适配客户端加载、插件注册及更新安装校验。支持 DeepSeek Harness 0.2.1-rc.3。保留 v1.3.4 的资源优化：关闭详情后释放面板内容，秒级刷新只影响倒计时区域，时间轴按分钟更新。提示音播放后暂停音频处理，关闭提醒时释放音频上下文；重新开启后可以再次播放。保留手动版本检查、日历自动更新、应用内提醒、系统通知反馈和轻柔提示音，没有新增运行时 npm 依赖。
 
 三轮本地对照中，测试页面的 JavaScript 堆占用减少约 0.07～0.15 MB，主线程耗时降低约 11%～19%。这是 Chrome 宿主模拟页的结果，不代表 Harness 整个进程的内存或 CPU 降幅，详见[资源优化记录](https://github.com/a961282799-crypto/dsh-timeband/blob/main/docs/performance.md)。
 
@@ -52,26 +52,32 @@ DeepSeek Harness 桌面端头像右侧的峰谷时段插件。状态、切换倒
 
 已针对 **DeepSeek Harness 0.2.1-rc.3** 验证。2026-10-24 核对四个宿主测试依赖与随附桌面 CLI 版本一致，Cordis 同步至 4.0.5。版本声明只覆盖此版本，宿主升级后应重新验证并更新 peer 范围。
 
-新版 **v1.3.6** 使用下方的 GitHub 预构建包安装。[npm](https://www.npmjs.com/package/dsh-timeband) 当前保留 v1.1.0。
+新版 **v1.3.7** 使用 [npm 包 @a961282799/dsh-timeband](https://www.npmjs.com/package/@a961282799/dsh-timeband) 安装。从托盘完全退出 Harness 后执行：
 
-从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.6) 下载预构建安装包 `dsh-timeband-1.3.6.tgz`。不需要安装开发依赖或自行编译。
+```powershell
+dsh plugin --profile desktop add @a961282799/dsh-timeband@1.3.7
+```
+
+如果已安装旧包 `dsh-timeband`，请先执行 `dsh plugin --profile desktop remove dsh-timeband`，再安装新包，避免同一插件加载两次。原有日历和提醒设置使用相同的保存位置。旧版不会自动更换包名，需要按上述步骤迁移。
+
+也可从 [GitHub Releases](https://github.com/a961282799-crypto/dsh-timeband/releases/tag/v1.3.7) 下载预构建安装包 `a961282799-dsh-timeband-1.3.7.tgz`。不需要安装开发依赖或自行编译。
 
 从托盘完全退出 Harness，在下载目录执行：
 
 ```powershell
-dsh plugin --profile desktop add ./dsh-timeband-1.3.6.tgz
+dsh plugin --profile desktop add ./a961282799-dsh-timeband-1.3.7.tgz
 ```
 
 如果 `dsh` 不在 PATH，使用桌面端安装目录中随附的命令，例如：
 
 ```powershell
-& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./dsh-timeband-1.3.6.tgz
+& 'C:\path\to\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd' plugin --profile desktop add ./a961282799-dsh-timeband-1.3.7.tgz
 ```
 
 安装后重新打开 Harness，侧栏底部即可看到插件。卸载：
 
 ```powershell
-dsh plugin --profile desktop remove dsh-timeband
+dsh plugin --profile desktop remove @a961282799/dsh-timeband
 ```
 
 ### 从源码打包

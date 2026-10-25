@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ReactDOMClient from 'react-dom/client';
 import * as jsxRuntime from 'react/jsx-runtime';
+import packageInfo from '../package.json';
 
 /** Exercise the shipped rc.2 renderer instead of implementing its prop binding.
  * The shell, locale dictionary and empty session source are fixtures; entry
@@ -75,7 +76,7 @@ async function start() {
     <div className="host-footer"><div>{renderSlot('sidebar.footer.action', { wide: true })}</div>
       <div><button aria-label="模拟账户">D</button></div></div>
   </aside>);
-  const plugin = modules['dsh-timeband'] as ClientPlugin;
+  const plugin = modules[packageInfo.name] as ClientPlugin;
   let mounted = root.plugin(plugin);
   await mounted.await();
   root.uiRenderer.mount(document.getElementById('app')!);

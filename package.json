@@ -1,9 +1,13 @@
 {
-  "name": "dsh-timeband",
-  "version": "1.3.6",
+  "name": "@a961282799/dsh-timeband",
+  "version": "1.3.7",
   "description": "头像旁的 DeepSeek 峰谷时段与今日时间轴",
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/a961282799-crypto/dsh-timeband.git"

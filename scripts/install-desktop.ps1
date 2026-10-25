@@ -11,12 +11,13 @@ if (-not $resolvedDsh) {
   throw '未找到桌面端随附的 dsh.cmd，请使用 -DshCommand 指定实际路径。'
 }
 $DshCommand = $resolvedDsh.Source
+$manifestPath = Join-Path $PSScriptRoot '../package.json'
+$timebandManifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 if ($Action -eq 'Remove') {
-  & $DshCommand plugin --profile desktop remove dsh-timeband
+  & $DshCommand plugin --profile desktop remove $timebandManifest.name
 } else {
-  $manifestPath = Join-Path $PSScriptRoot '../package.json'
-  $timebandManifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-  $packagePath = Join-Path $PSScriptRoot "../artifacts/dsh-timeband-$($timebandManifest.version).tgz"
+  $archiveName = $timebandManifest.name.TrimStart('@').Replace('/', '-')
+  $packagePath = Join-Path $PSScriptRoot "../artifacts/$archiveName-$($timebandManifest.version).tgz"
   if (-not (Test-Path -LiteralPath $packagePath)) { throw '缺少安装包，请先运行 npm pack --pack-destination artifacts。' }
   $packagePath = (Resolve-Path -LiteralPath $packagePath).Path
   & $DshCommand plugin --profile desktop add $packagePath

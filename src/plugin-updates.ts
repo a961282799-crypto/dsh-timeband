@@ -1,3 +1,7 @@
+import packageInfo from '../package.json' with { type: 'json' };
+
+export const PACKAGE_NAME = packageInfo.name;
+export const PACKAGE_FILE = PACKAGE_NAME.replace(/^@/, '').replace('/', '-');
 export const RELEASE_API = 'https://api.github.com/repos/a961282799-crypto/dsh-timeband/releases/latest';
 export const RELEASES_URL = 'https://github.com/a961282799-crypto/dsh-timeband/releases';
 export const UPDATE_TIMEOUT = 10_000;
@@ -33,7 +37,7 @@ export function newer(version: string, current: string): boolean {
 function releaseFor(version: unknown): Release | null {
   if (!parts(version)) return null;
   const tag = `v${version}`;
-  return { version: String(version), url: `${RELEASES_URL}/tag/${tag}`, download: `${RELEASES_URL}/download/${tag}/dsh-timeband-${version}.tgz` };
+  return { version: String(version), url: `${RELEASES_URL}/tag/${tag}`, download: `${RELEASES_URL}/download/${tag}/${PACKAGE_FILE}-${version}.tgz` };
 }
 export function parseRelease(value: unknown): Release {
   if (!value || typeof value !== 'object') throw new Error('Invalid release');
@@ -41,7 +45,7 @@ export function parseRelease(value: unknown): Release {
   const release = releaseFor(typeof data.tag_name === 'string' ? data.tag_name.slice(1) : null);
   if (!release || data.tag_name !== `v${release.version}` || data.draft !== false || data.prerelease !== false
     || data.html_url !== release.url || !Array.isArray(data.assets)
-    || !data.assets.some(asset => asset?.name === `dsh-timeband-${release.version}.tgz`
+    || !data.assets.some(asset => asset?.name === `${PACKAGE_FILE}-${release.version}.tgz`
       && asset.state === 'uploaded' && asset.browser_download_url === release.download)) throw new Error('Invalid release');
   return release;
 }
@@ -101,7 +105,7 @@ export function createPluginUpdates(options: Options) {
         if (!active) return;
         const result = reply.value;
         if (result.application === 'failed') update({ install: result.error?.code === 'incompatible-version' ? 'incompatible' : 'failed' });
-        else if (['restart-required', 'applied'].includes(result.application) && result.bundle === 'dsh-timeband') update({ install: result.application === 'applied' ? 'applied' : 'restart' });
+        else if (['restart-required', 'applied'].includes(result.application) && result.bundle === PACKAGE_NAME) update({ install: result.application === 'applied' ? 'applied' : 'restart' });
         else update({ install: 'unknown' });
       } catch { if (active) update({ install: 'unknown' }); }
       finally { install = undefined; }
