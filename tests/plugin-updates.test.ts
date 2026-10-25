@@ -7,7 +7,7 @@ import type { NativePluginManager } from '../src/plugin-updates.ts';
 
 const release = (version = '1.3.4') => ({ tag_name: `v${version}`, draft: false, prerelease: false,
   html_url: `${RELEASES_URL}/tag/v${version}`,
-  assets: [{ name: `a961282799-dsh-timeband-${version}.tgz`, state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v${version}/a961282799-dsh-timeband-${version}.tgz` }],
+  assets: [{ name: `dsh-timeband-${version}.tgz`, state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v${version}/dsh-timeband-${version}.tgz` }],
 });
 function fixture(context: TestContext, manager?: NativePluginManager) {
   context.mock.timers.enable({ apis: ['setTimeout'] });
@@ -24,10 +24,10 @@ function fixture(context: TestContext, manager?: NativePluginManager) {
 test('stable versions compare numerically and releases require the exact repository and built asset', () => {
   assert.equal(newer('1.10.0', '1.9.99'), true);
   for (const version of ['1.3.3', '1.3.2', '1.3.4-rc.1', '01.3.4', '1.3.4/evil']) assert.equal(newer(version, '1.3.3'), false);
-  assert.equal(parseRelease(release()).download, `${RELEASES_URL}/download/v1.3.4/a961282799-dsh-timeband-1.3.4.tgz`);
+  assert.equal(parseRelease(release()).download, `${RELEASES_URL}/download/v1.3.4/dsh-timeband-1.3.4.tgz`);
   for (const bad of [{ ...release(), draft: true }, { ...release(), prerelease: true }, { ...release(), assets: [] },
     { ...release(), html_url: 'https://github.com/other/package' }, { ...release(), assets: [{ ...release().assets[0], browser_download_url: 'https://evil.example/package.tgz' }] },
-    { ...release(), assets: [{ name: 'dsh-timeband-1.3.4.tgz', state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v1.3.4/dsh-timeband-1.3.4.tgz` }] }]) assert.throws(() => parseRelease(bad));
+    { ...release(), assets: [{ name: 'a961282799-dsh-timeband-1.3.4.tgz', state: 'uploaded', browser_download_url: `${RELEASES_URL}/download/v1.3.4/a961282799-dsh-timeband-1.3.4.tgz` }] }]) assert.throws(() => parseRelease(bad));
 });
 
 test('only explicit checks fetch metadata, without automatic checks or installation', async context => {
@@ -56,7 +56,7 @@ test('network failure and invalid or oversized metadata keep the known release a
 test('native installation pins the discovered asset, blocks duplicate clicks and requests a restart', async context => {
   const calls: { spec: string; requestId: string }[] = [];
   const f = fixture(context, {
-    async installBundle(spec, options) { calls.push({ spec, requestId: options.requestId }); return { ok: true, value: { application: 'restart-required', bundle: '@a961282799/dsh-timeband' } }; },
+    async installBundle(spec, options) { calls.push({ spec, requestId: options.requestId }); return { ok: true, value: { application: 'restart-required', bundle: 'dsh-timeband' } }; },
     async waitForInstall() { throw new Error('not needed'); }, async cancelInstall() {},
   });
   await f.updates.install(); assert.equal(calls.length, 0);
@@ -69,7 +69,7 @@ test('lost RPC replies recover the same request; an unconfirmed result cannot st
   let installs = 0, recoveries = 0, known = true, requestId = '';
   const f = fixture(context, {
     async installBundle(_spec, options) { installs++; requestId = options.requestId; return { ok: false, error: 'disconnected' }; },
-    async waitForInstall(id) { assert.equal(id, requestId); recoveries++; return { ok: true, value: known ? { application: 'restart-required', bundle: '@a961282799/dsh-timeband' } : null }; }, async cancelInstall() {},
+    async waitForInstall(id) { assert.equal(id, requestId); recoveries++; return { ok: true, value: known ? { application: 'restart-required', bundle: 'dsh-timeband' } : null }; }, async cancelInstall() {},
   });
   await f.updates.check(); await f.updates.install(); assert.equal(f.updates.getSnapshot().install, 'restart');
   f.updates.dispose(); known = false;
@@ -88,12 +88,12 @@ test('native compatibility rejection and failed installs never report success', 
 });
 
 test('native applied acknowledgements are honored, while another bundle cannot count as a successful update', async context => {
-  let bundle = '@a961282799/dsh-timeband';
+  let bundle = 'dsh-timeband';
   const f = fixture(context, { async installBundle() { return { ok: true, value: { application: 'applied', bundle } }; },
     async waitForInstall() { return { ok: true, value: null }; }, async cancelInstall() {},
   });
   await f.updates.check(); await f.updates.install(); assert.equal(f.updates.getSnapshot().install, 'applied'); f.updates.dispose();
-  for (bundle of ['dsh-timeband', 'other-plugin']) {
+  for (bundle of ['@a961282799/dsh-timeband', 'other-plugin']) {
     const next = createPluginUpdates(f.options); context.after(next.dispose);
     await next.check(); await next.install(); assert.equal(next.getSnapshot().install, 'unknown');
   }
@@ -116,7 +116,7 @@ test('unload cancels only its own native request and ignores late success', asyn
     async waitForInstall() { return { ok: true, value: null }; }, async cancelInstall(id) { cancelled = id; },
   });
   await f.updates.check(); const pending = f.updates.install(); f.updates.dispose();
-  finish({ ok: true, value: { application: 'restart-required', bundle: '@a961282799/dsh-timeband' } }); await pending;
+  finish({ ok: true, value: { application: 'restart-required', bundle: 'dsh-timeband' } }); await pending;
   assert.equal(cancelled, started); assert.equal(f.updates.getSnapshot().install, 'installing');
 });
 
