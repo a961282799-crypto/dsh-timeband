@@ -1,6 +1,6 @@
 # Harness 兼容性记录
 
-当前准备：2026-10-25，插件 v1.3.8（待发布），目标 npm 包名 dsh-timeband，Harness 0.2.1-rc.3。当前已发布版本仍为 @a961282799/dsh-timeband@1.3.7；原名删除和重新发布尚未完成。
+当前核对：2026-10-30，插件 v1.3.9，npm 包名 dsh-timeband，Harness 0.2.1-rc.5。以下旧版记录保留作为历史证据；当前适配见 v1.3.9 小节。
 
 | 项目 | 结果 |
 |---|---|
@@ -82,8 +82,18 @@ v1.3.2 使用原生 Web Audio 合成轻柔两音，正式与测试提醒共用�
 
 旧包 `dsh-timeband@1.1.0` 的删除请求等待 npm 官方网页验证。截至本次准备时，查询旧包仍存在，不能宣称删除完成。根据 [npm Unpublish Policy](https://docs.npmjs.com/policies/unpublish/)，整包删除后至少 24 小时内不能发布同名新版本，因此本地准备不代表 npm 改名已完成。待 npm 实际删除并允许重新使用名称后再发布；不以当前账号无权限的结果推断用户浏览器登录状态。
 
+v1.3.8 已于 2026-10-30 以原包名 `dsh-timeband` 发布到 npm。
+
+## v1.3.9：适配 Harness 0.2.1-rc.5
+
+2026-10-30，npm `@deepseek-ai/dsh` 的 `latest` 与 `next` 均为 0.2.1-rc.5（rc.4 未作为标签出现）。v1.3.8 的精确声明 `0.2.1-rc.3` 会被宿主兼容检查拒绝；兼容声明与四个 UI/locale 测试依赖更新至 0.2.1-rc.5，Cordis 仍为 4.0.5，未设置兼容豁免。
+
+对照 npm 发布的 rc.3 与 rc.5：`@deepseek-ai/dsh` 的依赖集合不变，renderer、slots、locale 除 package.json 外逐字节一致；sidebar 只有内嵌的构建版本字符串不同。模块加载器和 `sidebar.footer.action` 插槽不变，无须修改插件运行代码。
+
+兼容检查、类型检查、构建、59 项 Node 检查和 35 项浏览器检查通过；浏览器检查使用 rc.5 官方渲染器与 Cordis，在 Linux Chromium 中运行，覆盖详情开关、计时、日历、提醒、声音、更新和卸载。真实桌面安装验收需在本机 Harness 升级到 rc.5 后进行。
+
 ## 检查新宿主
 
-运行 `npm run compatibility`，检查当前桌面对应的 npm `next` 标签及本机测试依赖。2026-10-24 的 `next` 为 0.2.1-rc.3，而 `latest` 为 0.2.1-rc.2，不能据此认定桌面未升级。GitHub Plugin checks 在 push、PR 或手动触发时也会执行；版本不一致会失败并显示待验证版本。
+运行 `npm run compatibility`，检查当前桌面对应的 npm `next` 标签及本机测试依赖。2026-10-30 的 `next` 与 `latest` 均为 0.2.1-rc.5；两者不同时以 `next` 为准，不能据 `latest` 认定桌面未升级。GitHub Plugin checks 在 push、PR 或手动触发时也会执行；版本不一致会失败并显示待验证版本。
 
 正式标签变更后，在独立环境安装该版本的宿主 UI 依赖，核对共享 React、模块加载器、`sidebar.footer.action` 插槽及账户按钮结构。更新测试环境，运行 `npm run check`，再在真实桌面端检查安装、展开、关闭、折叠侧栏与卸载。通过后更新兼容声明和本记录，不仅靠修改 peer 范围宣称兼容。
