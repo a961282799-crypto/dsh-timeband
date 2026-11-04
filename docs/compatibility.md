@@ -1,6 +1,6 @@
 # Harness 兼容性记录
 
-当前核对：2026-10-30，插件 v1.3.9，npm 包名 dsh-timeband，Harness 0.2.1-rc.5。以下旧版记录保留作为历史证据；当前适配见 v1.3.9 小节。
+当前核对：2026-11-04，插件 v1.3.10，npm 包名 dsh-timeband，Harness 0.2.2-rc.1。以下旧版记录保留作为历史证据；当前适配见 v1.3.10 小节。
 
 | 项目 | 结果 |
 |---|---|
@@ -92,8 +92,16 @@ v1.3.8 已于 2026-10-30 以原包名 `dsh-timeband` 发布到 npm。
 
 兼容检查、类型检查、构建、59 项 Node 检查和 35 项浏览器检查通过；浏览器检查使用 rc.5 官方渲染器与 Cordis，在 Linux Chromium 中运行，覆盖详情开关、计时、日历、提醒、声音、更新和卸载。真实桌面安装验收需在本机 Harness 升级到 rc.5 后进行。
 
+## v1.3.10：适配 Harness 0.2.2-rc.1
+
+2026-11-04，npm `@deepseek-ai/dsh` 的 `next` 为 0.2.2-rc.1（当天发布），`latest` 仍为 0.2.1-rc.5。v1.3.9 的精确声明 `0.2.1-rc.5` 会被宿主兼容检查拒绝；兼容声明与四个 UI/locale 测试依赖更新至 0.2.2-rc.1，未设置兼容豁免。
+
+这次宿主不只是改版本号：Cordis 由 4.0.5 升至 4.1.0（`cordis-plugin-loader`、`-include`、`-timer`、`schemastery` 同步升级），测试依赖的 Cordis 也改为 4.1.0。对照 npm 发布的 rc.5 与 0.2.2-rc.1：renderer、slots 除 package.json 外逐字节一致；sidebar 与 locale 有改动，但 `sidebar.footer.action` 插槽、模块加载器以及插件使用的 locale 注入不变。更新检查依赖的 `pluginManager.installBundle`、`waitForInstall`、`cancelInstall` 签名与 `ChangeResult` 结构在两版中一致。无须修改插件运行代码。
+
+类型检查、构建、59 项 Node 检查和 35 项浏览器检查在 Cordis 4.1.0 与 0.2.2-rc.1 官方渲染器下通过，浏览器检查在 Linux Chromium 中运行。真实桌面安装验收需在本机 Harness 升级到 0.2.2-rc.1 后进行。
+
 ## 检查新宿主
 
-运行 `npm run compatibility`，检查当前桌面对应的 npm `next` 标签及本机测试依赖。2026-10-30 的 `next` 与 `latest` 均为 0.2.1-rc.5；两者不同时以 `next` 为准，不能据 `latest` 认定桌面未升级。GitHub Plugin checks 在 push、PR 或手动触发时也会执行；版本不一致会失败并显示待验证版本。
+运行 `npm run compatibility`，检查当前桌面对应的 npm `next` 标签及本机测试依赖。2026-11-04 的 `next` 为 0.2.2-rc.1，`latest` 为 0.2.1-rc.5；两者不同时以 `next` 为准，不能据 `latest` 认定桌面未升级。GitHub Plugin checks 在 push、PR 或手动触发时也会执行；版本不一致会失败并显示待验证版本。
 
 正式标签变更后，在独立环境安装该版本的宿主 UI 依赖，核对共享 React、模块加载器、`sidebar.footer.action` 插槽及账户按钮结构。更新测试环境，运行 `npm run check`，再在真实桌面端检查安装、展开、关闭、折叠侧栏与卸载。通过后更新兼容声明和本记录，不仅靠修改 peer 范围宣称兼容。
